@@ -33,7 +33,7 @@ const firebaseConfig = {
       const enteredPassword = document.getElementById("loginPassword").value;
       db.collection("siteConfig").doc("mainPassword").get().then((doc) => {
         if (doc.exists && doc.data().password === enteredPassword) {
-          window.location.href = "page.html"; // Redirect to the main page
+          window.location.href = "Main.html"; // Redirect to the main page
         } else {
           alert("BIG RED X. its monthdayyear xx-xx-xx(no "-")");
         }
