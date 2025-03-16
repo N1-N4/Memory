@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Flipbook</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
+        .flipbook-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 80vh;
+        }
+        .flipbook {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            perspective: 1000px;
+        }
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            transition: transform 1s;
+            transform-origin: right;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+        .hidden {
+            display: none;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 15px 30px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #45a049; /* Darker green */
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Flipbook</h1>
+    
+    <div class="flipbook-container">
+        <div class="flipbook">
+            <div class="page" id="page1" style="background-image: url('image1.jpg');"></div>
+            <div class="page hidden" id="page2" style="background-image: url('image2.jpg');"></div>
+            <div class="page hidden" id="page3" style="background-image: url('image3.jpg');"></div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button onclick="prevPage()">Previous</button>
+        <button onclick="nextPage()">Next</button>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+        <a href="page1.html" class="btn">Page 1</a>
+        <a href="page2.html" class="btn">Page 2</a>
+        <a href="contact.html" class="btn">Contact</a>
+        <a href="about.html" class="btn">About Us</a>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 3;
+
+        function showPage(pageNumber) {
+            for (let i = 1; i <= totalPages; i++) {
+                document.getElementById(`page${i}`).classList.add("hidden");
+            }
+            document.getElementById(`page${pageNumber}`).classList.remove("hidden");
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        }
+
+        showPage(currentPage);
+    </script>
+</body>
+</html>
