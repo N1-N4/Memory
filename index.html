@@ -37,8 +37,10 @@ const firebaseConfig = {
         } else {
           alert("BIG RED X. its monthdayyear xx-xx-xx(no "-")");
         }
-      }).catch(error => {
+      })
+      .catch(error => {
         console.error("Error checking password: ", error);
+        alert("Login.Error");
       });
     }
   </script>
