@@ -30,11 +30,15 @@ const firebaseConfig = {
     const db = firebase.firestore();
 
     function login() {
-      const enteredPassword = document.getElementById("loginPassword").value;
+      const enteredPassword = document.getElementById("loginPassword").value.trim();
       db.collection("siteConfig").doc("mainPassword").get().then((doc) => {
-        if (doc.exists && doc.data().password === enteredPassword) {
-          window.location.href = "Main.html"; // Redirect to the main page
-        } else {
+        if (doc.exists) {
+          // Check if the entered password matches the one from Firestore
+          const storedPassword = doc.data().password; // Should be  in Firestore
+          if (enteredPassword === storedPassword) {
+            // Redirect to the main page if password is correct
+            window.location.href = "Main.html"; // Replace with your actual page name
+          } else {
           alert("BIG RED X. its monthdayyear xx-xx-xx(no "-")");
         }
       })
