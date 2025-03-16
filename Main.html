@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Our Relationship Memories</title>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+  <style>
+    body { text-align: center; font-family: Arial, sans-serif; }
+    h2 { margin-top: 20px; }
+    .hidden-section { display: none; padding: 20px; border: 2px dashed #888; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Our Relationship Website</h1>
+
+  <h2>Secret Section</h2>
+  <input type="password" id="sectionPassword" placeholder="How many plates of meat:#plates eg.7cups">
+  <button onclick="unlockSection()">Unlock</button>
+  <div id="hiddenSection" class="hidden-section">
+    <p>This is the hidden content!</p>
+  </div>
+
+  <script>
+    function unlockSection() {
+      const enteredPassword = document.getElementById("sectionPassword").value;
+      if (enteredPassword === "3plates") {
+        document.getElementById("hiddenSection").style.display = "block";
+      } else {
+        alert("HOW DARE YOU FORGET");
+      }
+    }
+  </script>
+</body>
+</html>
+
+</html>
