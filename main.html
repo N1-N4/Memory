@@ -18,11 +18,13 @@
       margin: 0;
       background-color: #f8c9d2; /* Light pink background */
       font-family: 'Poppins', sans-serif; /* Cute font */
+      flex-direction: column;
     }
 
     /* Container for the flipbook */
     .flipbook-container {
       perspective: 1500px; /* Gives depth for 3D effect */
+      margin-bottom: 20px;
     }
 
     /* The flipbook itself */
@@ -35,11 +37,10 @@
       transform-origin: left;
       border-radius: 20px; /* Rounded corners */
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transform: rotateY(0deg); /* Ensuring initial state is 0 degree */
     }
 
-    /* The cover of the book */
-    .flipbook .cover {
+    /* Book cover with 3D cuboid effect */
+    .cover {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -55,10 +56,12 @@
       transition: transform 1s;
       text-align: center;
       padding: 20px;
+      transform: rotateY(0deg) translateZ(160px);
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
     }
 
     /* Page styles */
-    .flipbook .page {
+    .page {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -69,11 +72,10 @@
       align-items: center;
     }
 
-    /* Add depth to pages, not completely overlapping */
-    .flipbook .page:nth-child(2) {
+    /* Page 1 */
+    .page:nth-child(2) {
       background-color: #ffcccb;
       transform: rotateY(180deg);
-      background-image: url('https://via.placeholder.com/300x400/ffcccb/000000?text=Page+1'); /* Example image */
       z-index: 1;
       transform-origin: left;
       /* Curved page effect on the right */
@@ -81,10 +83,10 @@
       border-radius: 10px;
     }
 
-    .flipbook .page:nth-child(3) {
+    /* Page 2 */
+    .page:nth-child(3) {
       background-color: #ffcccb;
       transform: rotateY(180deg);
-      background-image: url('https://via.placeholder.com/300x400/ffcccb/000000?text=Page+2'); /* Example image */
       z-index: 0;
       transform-origin: left;
       /* Curved page effect */
@@ -98,7 +100,7 @@
     }
 
     /* Style for the clickable page areas */
-    .flipbook .page a {
+    .page a {
       display: block;
       width: 100%;
       height: 100%;
@@ -108,10 +110,32 @@
     }
 
     /* Style for the content inside pages (e.g., images, text) */
-    .flipbook .page img {
+    .page img {
       width: 100%;
       height: 33.33%;
       object-fit: cover;
+    }
+
+    /* Button styles */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .buttons button {
+      background-color: #f49ac2;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .buttons button:hover {
+      background-color: #e093b4;
     }
   </style>
 </head>
@@ -120,7 +144,7 @@
   <!-- Container for the flipbook -->
   <div class="flipbook-container">
     <div class="flipbook">
-      <!-- Book cover -->
+      <!-- Book cover with 3D effect -->
       <div class="cover">
         <span>My Cute Flipbook</span> <!-- You can customize this text -->
       </div>
@@ -145,25 +169,39 @@
     </div>
   </div>
 
+  <!-- Buttons to navigate the flipbook -->
+  <div class="buttons">
+    <button onclick="flipLeft()">Previous</button>
+    <button onclick="flipRight()">Next</button>
+  </div>
+
   <script>
-    // Adding interactivity: when the user hovers over the flipbook, the pages fold
+    // The book element and its pages
     const flipbook = document.querySelector('.flipbook');
-    flipbook.addEventListener('mousemove', (e) => {
-      const rect = flipbook.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+    let currentPage = 0; // Start at the first page
 
-      const rotateX = (mouseY - centerY) / 10;
-      const rotateY = (mouseX - centerX) / 10;
+    // Function to turn the page to the left (previous)
+    function flipLeft() {
+      if (currentPage > 0) {
+        currentPage--;
+        updateFlipbook();
+      }
+    }
 
-      flipbook.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
-    });
+    // Function to turn the page to the right (next)
+    function flipRight() {
+      if (currentPage < 2) { // assuming 3 pages (cover + 2 pages)
+        currentPage++;
+        updateFlipbook();
+      }
+    }
 
-    flipbook.addEventListener('mouseleave', () => {
-      flipbook.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    });
+    // Update the flipbook based on the current page
+    function updateFlipbook() {
+      // Set the rotation of the flipbook based on the current page
+      const rotationAngle = -180 * currentPage; // Rotate 180 degrees per page
+      flipbook.style.transform = `rotateY(${rotationAngle}deg)`;
+    }
   </script>
 
 </body>
