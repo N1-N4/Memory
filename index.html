@@ -3,59 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+  <!-- Link to Google Fonts for cute fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
-    input, button { padding: 10px; margin: 10px; font-size: 16px; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8c9d2; /* Pastel pink background */
+      color: #ffffff;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    input {
+      padding: 15px;
+      font-size: 18px;
+      margin: 20px;
+      border-radius: 10px;
+      border: 2px solid #f49ac2;
+      width: 250px;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 18px;
+      background-color: #f49ac2;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 250px;
+    }
+
+    button:hover {
+      background-color: #f28bb4;
+    }
+
+    p {
+      font-size: 18px;
+      color: #ffffff;
+      margin-top: 10px;
+    }
+
+    #hintMessage {
+      display: none;
+      color: #f28bb4;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    /* Add cute heart icons */
+    .heart {
+      color: #ff6b81;
+      font-size: 40px;
+      margin: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Enter Website Password</h1>
-  <input type="password" id="loginPassword" placeholder="Enter password( hint: Day1)">
+  <input type="password" id="loginPassword" placeholder="Enter password">
   <button onclick="login()">Login</button>
+  <p id="hintMessage">Hint: Day 1</p>
+
+  <div>
+    <span class="heart">💖</span>
+    <span class="heart">💖</span>
+    <span class="heart">💖</span>
+  </div>
 
   <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBJL6MtIittj8aDyjd6K2C0Uu2tkvfK7Z8",
-      authDomain: "memory-4924.firebaseapp.com",
-      projectId: "memory-4924",
-      storageBucket: "memory-4924.firebasestorage.app",
-      messagingSenderId: "132674054682",
-      appId: "1:132674054682:web:5c0e833f8f553feb6c7fa3",
-      measurementId: "G-WD7VV5CW9F"
-    };
-    
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    // Predefined correct password
+    const correctPassword = "090424"; // Correct password
+    let firstAttemptFailed = false; // Flag to track if it's the first attempt
 
     function login() {
+      // Get the entered password from the input field
       const enteredPassword = document.getElementById("loginPassword").value;
-      console.log("Entered Password:", enteredPassword); // Debugging input
+      console.log("Entered Password:", enteredPassword); // Debugging the entered password
 
-      db.collection("SiteConfig").doc("MainPassword").get().then((doc) => {
-        if (doc.exists) {
-          const storedPassword = doc.data().Password; // Fetch password from Firestore
-          console.log("Fetched Password from Firebase:", storedPassword); // Debugging Firestore data
-
-          if (enteredPassword === storedPassword) {
-            console.log("Password matched! Redirecting..."); // Debugging password match
-            location.href = "main.html"; // Redirect to the main page
-          } else {
-            alert("Incorrect password format.");
-            console.log("Password mismatch.");
-          }
+      // Check if the entered password matches the correct password
+      if (enteredPassword === correctPassword) {
+        console.log("Password matched! Redirecting..."); // Password match
+        location.href = "main.html"; // Redirect to another page
+      } else {
+        // If it's the first failed attempt, show the hint
+        if (!firstAttemptFailed) {
+          firstAttemptFailed = true; // Mark that the first attempt failed
+          document.getElementById("hintMessage").style.display = "block"; // Show hint
         } else {
-          alert("Error: Document does not exist.");
-          console.log("Document does not exist.");
+          alert("Incorrect password format.");
         }
-      })
-      .catch(error => {
-        console.error("Error checking password: ", error);
-        alert("Login Error: " + error.message);
-      });
+        console.log("Password mismatch.");
+      }
     }
   </script>
 </body>
