@@ -1,117 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Flipbook</title>
-    <style>
-        /* General Page Styling */
-        body { 
-            text-align: center; 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            background-color: #f0f0f0; /* <-- Change background color here */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Flipbook with Curved Pages</title>
+  
+  <!-- Link to Google Fonts for cute fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Customize the overall page style here */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8c9d2; /* Light pink background */
+      font-family: 'Poppins', sans-serif; /* Cute font */
+    }
 
-        /* Flipbook Container */
-        .flipbook-container { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh;
-        }
+    /* Container for the flipbook */
+    .flipbook-container {
+      perspective: 1500px; /* Gives depth for 3D effect */
+    }
 
-        /* Book Cover */
-        .book {
-            width: 350px; /* <-- Adjust book width */
-            height: 500px; /* <-- Adjust book height */
-            position: relative;
-            perspective: 1200px;
-        }
+    /* The flipbook itself */
+    .flipbook {
+      width: 320px;
+      height: 400px;
+      transform-style: preserve-3d;
+      position: relative;
+      transition: transform 1s;
+      transform-origin: left;
+      border-radius: 20px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transform: rotateY(0deg); /* Ensuring initial state is 0 degree */
+    }
 
-        /* Individual Page */
-        .page {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            background-size: cover;
-            background-position: center;
-            transition: transform 1s ease-in-out;
-            transform-origin: right;
-            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
-        }
+    /* The cover of the book */
+    .flipbook .cover {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: #f49ac2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 20px 20px 0 0; /* Rounded top corners */
+      z-index: 2;
+      transition: transform 1s;
+      text-align: center;
+      padding: 20px;
+    }
 
-        /* Cover Page - Front */
-        .cover {
-            background-color: #2C3E50; /* <-- Change cover color here */
-            color: white; /* <-- Change title color here */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            border-radius: 5px;
-        }
+    /* Page styles */
+    .flipbook .page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      transition: transform 1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        /* Page Navigation Areas */
-        .navigation {
-            position: absolute;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            cursor: pointer;
-        }
-        .left { left: 0; }
-        .right { right: 0; }
+    /* Add depth to pages, not completely overlapping */
+    .flipbook .page:nth-child(2) {
+      background-color: #ffcccb;
+      transform: rotateY(180deg);
+      background-image: url('https://via.placeholder.com/300x400/ffcccb/000000?text=Page+1'); /* Example image */
+      z-index: 1;
+      transform-origin: left;
+      /* Curved page effect on the right */
+      transform: rotateY(180deg) translateZ(1px) scale(0.98);
+      border-radius: 10px;
+    }
 
-    </style>
+    .flipbook .page:nth-child(3) {
+      background-color: #ffcccb;
+      transform: rotateY(180deg);
+      background-image: url('https://via.placeholder.com/300x400/ffcccb/000000?text=Page+2'); /* Example image */
+      z-index: 0;
+      transform-origin: left;
+      /* Curved page effect */
+      transform: rotateY(180deg) translateZ(1px) scale(0.98);
+      border-radius: 10px;
+    }
+
+    /* Hover effects for the book (optional) */
+    .flipbook:hover {
+      transform: rotateY(-10deg); /* Slight tilt effect */
+    }
+
+    /* Style for the clickable page areas */
+    .flipbook .page a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+      background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent overlay */
+    }
+
+    /* Style for the content inside pages (e.g., images, text) */
+    .flipbook .page img {
+      width: 100%;
+      height: 33.33%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
-    
-    <div class="flipbook-container">
-        <div class="book">
-            <div class="page cover">My Memory Flipbook</div>
-            <div class="page" style="background-image: url('image1.jpg');"></div>
-            <div class="page" style="background-image: url('image2.jpg');"></div>
-            <div class="page" style="background-image: url('image3.jpg');"></div>
-        </div>
+
+  <!-- Container for the flipbook -->
+  <div class="flipbook-container">
+    <div class="flipbook">
+      <!-- Book cover -->
+      <div class="cover">
+        <span>My Cute Flipbook</span> <!-- You can customize this text -->
+      </div>
+
+      <!-- Page 1 -->
+      <div class="page">
+        <a href="your-custom-url-here.html" target="_blank">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+1" alt="Image 1">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+2" alt="Image 2">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+3" alt="Image 3">
+        </a>
+      </div>
+
+      <!-- Page 2 -->
+      <div class="page">
+        <a href="your-custom-url-here.html" target="_blank">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+4" alt="Image 4">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+5" alt="Image 5">
+          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+6" alt="Image 6">
+        </a>
+      </div>
     </div>
+  </div>
 
-    <!-- Invisible Navigation Areas for Flipping -->
-    <div class="navigation left" onclick="prevPage()"></div>
-    <div class="navigation right" onclick="nextPage()"></div>
+  <script>
+    // Adding interactivity: when the user hovers over the flipbook, the pages fold
+    const flipbook = document.querySelector('.flipbook');
+    flipbook.addEventListener('mousemove', (e) => {
+      const rect = flipbook.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
 
-    <script>
-        let currentPage = 0;
-        const pages = document.querySelectorAll(".page");
+      const rotateX = (mouseY - centerY) / 10;
+      const rotateY = (mouseX - centerX) / 10;
 
-        function showPage(pageNumber) {
-            pages.forEach((page, index) => {
-                page.style.transform = index <= pageNumber ? "rotateY(-180deg)" : "rotateY(0)";
-            });
-        }
+      flipbook.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
+    });
 
-        function nextPage() {
-            if (currentPage < pages.length - 1) {
-                currentPage++;
-                showPage(currentPage);
-            }
-        }
-
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                showPage(currentPage);
-            }
-        }
-
-        pages.forEach((page, index) => {
-            page.addEventListener("click", () => {
-                window.location.href = `page${index}.html`; // Each page leads to a separate webpage
-            });
-        });
-
-    </script>
+    flipbook.addEventListener('mouseleave', () => {
+      flipbook.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+  </script>
 
 </body>
 </html>
