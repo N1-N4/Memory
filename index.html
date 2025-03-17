@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
-  <script src="https://
-    www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
   <style>
     body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
@@ -17,41 +16,47 @@
   <button onclick="login()">Login</button>
 
   <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBJL6MtIittj8aDyjd6K2C0Uu2tkvfK7Z8",
-  authDomain: "memory-4924.firebaseapp.com",
-  projectId: "memory-4924",
-  storageBucket: "memory-4924.firebasestorage.app",
-  messagingSenderId: "132674054682",
-  appId: "1:132674054682:web:5c0e833f8f553feb6c7fa3",
-  measurementId: "G-WD7VV5CW9F"
-};
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJL6MtIittj8aDyjd6K2C0Uu2tkvfK7Z8",
+      authDomain: "memory-4924.firebaseapp.com",
+      projectId: "memory-4924",
+      storageBucket: "memory-4924.firebasestorage.app",
+      messagingSenderId: "132674054682",
+      appId: "1:132674054682:web:5c0e833f8f553feb6c7fa3",
+      measurementId: "G-WD7VV5CW9F"
+    };
+    
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function login() {
-  const enteredPassword = document.getElementById("loginPassword").value;
-  db.collection("SiteConfig").doc("MainPassword").get().then((doc) => {
-    if (doc.exists) {
-      const storedPassword = doc.data().Password; // Match Firestore field
-      alert("Fetched password from Firebase: " + storedPassword); // Debugging step
-      
-      if (enteredPassword === storedPassword) {
-        alert("Login successful! Redirecting...");
-        location.href = "main.html"; // Redirect to main pag
-      } else {
-        alert("BIG RED X. Incorrect password format.");
-      }
-    } else {
-      alert("Error: Document does not exist.");
-    }
-  })
-  .catch(error => {
-    console.error("Error checking password: ", error);
-    alert("Login Error: " + error.message);
-  });
-}
+      const enteredPassword = document.getElementById("loginPassword").value;
+      console.log("Entered Password:", enteredPassword); // Debugging input
 
+      db.collection("SiteConfig").doc("MainPassword").get().then((doc) => {
+        if (doc.exists) {
+          const storedPassword = doc.data().Password; // Fetch password from Firestore
+          console.log("Fetched Password from Firebase:", storedPassword); // Debugging Firestore data
+
+          if (enteredPassword === storedPassword) {
+            console.log("Password matched! Redirecting..."); // Debugging password match
+            location.href = "main.html"; // Redirect to the main page
+          } else {
+            alert("Incorrect password format.");
+            console.log("Password mismatch.");
+          }
+        } else {
+          alert("Error: Document does not exist.");
+          console.log("Document does not exist.");
+        }
+      })
+      .catch(error => {
+        console.error("Error checking password: ", error);
+        alert("Login Error: " + error.message);
+      });
+    }
   </script>
 </body>
 </html>
