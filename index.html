@@ -31,7 +31,7 @@ const firebaseConfig = {
 
     function login() {
       const enteredPassword = document.getElementById("loginPassword").value.trim();
-      db.collection("SiteConfig").doc("mainPassword").get().then((doc) => {
+      db.collection("SiteConfig").doc("MainPassword").get().then((doc) => {
         if (doc.exists) {
           // Check if the entered password matches the one from Firestore
           const storedPassword = doc.data().password; // Should be  in Firestore
