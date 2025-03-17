@@ -1,208 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Flipbook with Curved Pages</title>
-  
-  <!-- Link to Google Fonts for cute fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <style>
-    /* Customize the overall page style here */
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f8c9d2; /* Light pink background */
-      font-family: 'Poppins', sans-serif; /* Cute font */
-      flex-direction: column;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>3D Flipbook</title>
+    <style>
+        /* General body and container settings */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
 
-    /* Container for the flipbook */
-    .flipbook-container {
-      perspective: 1500px; /* Gives depth for 3D effect */
-      margin-bottom: 20px;
-    }
+        /* Book Container */
+        .book {
+            width: 600px;
+            height: 400px;
+            perspective: 1500px;
+            position: relative;
+        }
 
-    /* The flipbook itself */
-    .flipbook {
-      width: 320px;
-      height: 400px;
-      transform-style: preserve-3d;
-      position: relative;
-      transition: transform 1s;
-      transform-origin: left;
-      border-radius: 20px; /* Rounded corners */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+        /* Book Core */
+        .book-inner {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            position: relative;
+        }
 
-    /* Book cover with 3D cuboid effect */
-    .cover {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: #f49ac2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 24px;
-      font-weight: bold;
-      border-radius: 20px 20px 0 0; /* Rounded top corners */
-      z-index: 2;
-      transition: transform 1s;
-      text-align: center;
-      padding: 20px;
-      transform: rotateY(0deg) translateZ(160px);
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
-    }
+        /* Cover and Pages */
+        .cover, .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transform-origin: left center;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
 
-    /* Page styles */
-    .page {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      transition: transform 1s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+        /* Book Cover */
+        .cover {
+            background: #8B0000; /* Dark red cover */
+            transform: translateZ(15px); /* Thicker cover */
+        }
 
-    /* Page 1 */
-    .page:nth-child(2) {
-      background-color: #ffcccb;
-      transform: rotateY(180deg);
-      z-index: 1;
-      transform-origin: left;
-      /* Curved page effect on the right */
-      transform: rotateY(180deg) translateZ(1px) scale(0.98);
-      border-radius: 10px;
-    }
+        /* Individual Pages */
+        .page {
+            background: white;
+            transform: translateZ(5px);
+            transition: transform 0.8s;
+            border: 1px solid #ddd;
+        }
 
-    /* Page 2 */
-    .page:nth-child(3) {
-      background-color: #ffcccb;
-      transform: rotateY(180deg);
-      z-index: 0;
-      transform-origin: left;
-      /* Curved page effect */
-      transform: rotateY(180deg) translateZ(1px) scale(0.98);
-      border-radius: 10px;
-    }
+        /* Curved Page Effect */
+        .page.flipped {
+            transform: rotateY(-180deg);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+        }
 
-    /* Hover effects for the book (optional) */
-    .flipbook:hover {
-      transform: rotateY(-10deg); /* Slight tilt effect */
-    }
+        /* Heart-shaped Navigation Arrows */
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            cursor: pointer;
+            color: #d33;
+            user-select: none;
+        }
+        
+        .left-arrow { left: -50px; }
+        .right-arrow { right: -50px; }
 
-    /* Style for the clickable page areas */
-    .page a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      text-decoration: none;
-      color: inherit;
-      background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent overlay */
-    }
+        /* Page Content */
+        .page-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 24px;
+        }
 
-    /* Style for the content inside pages (e.g., images, text) */
-    .page img {
-      width: 100%;
-      height: 33.33%;
-      object-fit: cover;
-    }
-
-    /* Button styles */
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .buttons button {
-      background-color: #f49ac2;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: background-color 0.3s;
-    }
-
-    .buttons button:hover {
-      background-color: #e093b4;
-    }
-  </style>
+        /* Customizable Page Edges */
+        .stacked-pages {
+            position: absolute;
+            width: 98%;
+            height: 100%;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            transform: translateZ(-1px); /* Layers below */
+            margin-left: 1%;
+        }
+    </style>
 </head>
 <body>
+    <div class="book">
+        <div class="book-inner">
+            <!-- Book Cover -->
+            <div class="cover"></div>
 
-  <!-- Container for the flipbook -->
-  <div class="flipbook-container">
-    <div class="flipbook">
-      <!-- Book cover with 3D effect -->
-      <div class="cover">
-        <span>My Cute Flipbook</span> <!-- You can customize this text -->
-      </div>
+            <!-- Stacked Pages -->
+            <div class="stacked-pages"></div>
+            <div class="stacked-pages"></div>
+            <div class="stacked-pages"></div>
 
-      <!-- Page 1 -->
-      <div class="page">
-        <a href="your-custom-url-here.html" target="_blank">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+1" alt="Image 1">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+2" alt="Image 2">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+3" alt="Image 3">
-        </a>
-      </div>
+            <!-- Pages -->
+            <div class="page" id="page1">
+                <div class="page-content">
+                    <a href="page1.html">
+                        <img src="your-image-1.jpg" alt="Page 1" style="max-width: 90%; max-height: 90%;">
+                    </a>
+                </div>
+            </div>
+            <div class="page" id="page2">
+                <div class="page-content">
+                    <a href="page2.html">
+                        <img src="your-image-2.jpg" alt="Page 2" style="max-width: 90%; max-height: 90%;">
+                    </a>
+                </div>
+            </div>
+        </div>
 
-      <!-- Page 2 -->
-      <div class="page">
-        <a href="your-custom-url-here.html" target="_blank">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+4" alt="Image 4">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+5" alt="Image 5">
-          <img src="https://via.placeholder.com/300x200/ffcccb/000000?text=Image+6" alt="Image 6">
-        </a>
-      </div>
+        <!-- Navigation Arrows -->
+        <div class="arrow left-arrow" onclick="flipPage(-1)">❤️</div>
+        <div class="arrow right-arrow" onclick="flipPage(1)">❤️</div>
     </div>
-  </div>
 
-  <!-- Buttons to navigate the flipbook -->
-  <div class="buttons">
-    <button onclick="flipLeft()">Previous</button>
-    <button onclick="flipRight()">Next</button>
-  </div>
+    <script>
+        let currentPage = 0;
+        const pages = document.querySelectorAll('.page');
 
-  <script>
-    // The book element and its pages
-    const flipbook = document.querySelector('.flipbook');
-    let currentPage = 0; // Start at the first page
-
-    // Function to turn the page to the left (previous)
-    function flipLeft() {
-      if (currentPage > 0) {
-        currentPage--;
-        updateFlipbook();
-      }
-    }
-
-    // Function to turn the page to the right (next)
-    function flipRight() {
-      if (currentPage < 2) { // assuming 3 pages (cover + 2 pages)
-        currentPage++;
-        updateFlipbook();
-      }
-    }
-
-    // Update the flipbook based on the current page
-    function updateFlipbook() {
-      // Set the rotation of the flipbook based on the current page
-      const rotationAngle = -180 * currentPage; // Rotate 180 degrees per page
-      flipbook.style.transform = `rotateY(${rotationAngle}deg)`;
-    }
-  </script>
-
+        function flipPage(direction) {
+            if (direction === 1 && currentPage < pages.length) {
+                pages[currentPage].classList.add('flipped');
+                currentPage++;
+            } else if (direction === -1 && currentPage > 0) {
+                currentPage--;
+                pages[currentPage].classList.remove('flipped');
+            }
+        }
+    </script>
 </body>
 </html>
