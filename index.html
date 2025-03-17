@@ -34,7 +34,7 @@ const firebaseConfig = {
       db.collection("SiteConfig").doc("MainPassword").get().then((doc) => {
         if (doc.exists) {
           // Check if the entered password matches the one from Firestore
-          const storedPassword = doc.data().password; // Should be  in Firestore
+          const storedPassword = doc.data().Password; // Should be  in Firestore
           if (enteredPassword === storedPassword) {
             // Redirect to the main page if password is correct
             window.location.href = "Main.html"; // Replace with your actual page name
