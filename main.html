@@ -33,19 +33,19 @@
             transform-style: preserve-3d;
         }
 
-        /* Cover (Bigger & Thicker) */
+        /* Cover (Thicker & Larger) */
         .cover {
             position: absolute;
-            width: calc(50% + 10px);
-            height: calc(100% + 10px);
+            width: calc(50% + 15px);
+            height: calc(100% + 15px);
             background: #8B0000;
             z-index: 5;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        .cover.left { left: -5px; }
-        .cover.right { right: -5px; transform-origin: left; }
+        .cover.left { left: -7px; }
+        .cover.right { right: -7px; transform-origin: left; }
 
-        /* Pages (White, Slight Curve, Stack Effect) */
+        /* Pages */
         .page {
             position: absolute;
             width: 50%;
@@ -55,187 +55,7 @@
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
             transform-origin: left center;
             transition: transform 0.8s;
-        }
-
-        /* Stacked Pages Effect */
-        .stacked-page {
-            position: absolute;
-            width: 49%;
-            height: 98%;
-            background: #f8f8f8;
-            border: 1px solid #e0e0e0;
-            z-index: 1;
-            left: 0.5%;
-            transform: translateZ(-1px);
-        }
-
-        /* Right Page Flipping */
-        .right-page {
-            right: 0;
-            transform-origin: left;
-        }
-        .right-page.flipped {
-            transform: rotateY(-180deg);
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Page Curvature */
-        .page.flipping {
-            transform: rotateY(-90deg) translateX(-2px);
-        }
-
-        /* Page Content */
-        .page-content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        /* Heart Navigation Arrows */
-        .arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            cursor: pointer;
-            color: #d33;
-            user-select: none;
-        }
-        
-        .left-arrow { left: -60px; }
-        .right-arrow { right: -60px; }
-    </style>
-</head>
-<body>
-    <div class="book">
-        <!-- Left Cover -->
-        <div class="cover left"></div>
-
-        <div class="book-inner">
-            <!-- Stacked Pages Underneath -->
-            <div class="stacked-page"></div>
-            <div class="stacked-page"></div>
-            <div class="stacked-page"></div>
-
-            <!-- Pages -->
-            <div class="page left-page" id="leftPage">
-                <div class="page-content">Page 1</div>
-            </div>
-
-            <div class="page right-page" id="rightPage1">
-                <div class="page-content">Page 2</div>
-            </div>
-
-            <div class="page right-page" id="rightPage2">
-                <div class="page-content">Page 3</div>
-            </div>
-
-            <div class="page right-page" id="rightPage3">
-                <div class="page-content">Page 4</div>
-            </div>
-
-            <div class="page right-page" id="rightPage4">
-                <div class="page-content">Page 5</div>
-            </div>
-
-            <div class="page right-page" id="rightPage5">
-                <div class="page-content">Page 6</div>
-            </div>
-
-            <div class="page right-page" id="rightPage6">
-                <div class="page-content">Page 7</div>
-            </div>
-
-            <div class="page right-page" id="rightPage7">
-                <div class="page-content">Page 8</div>
-            </div>
-        </div>
-
-        <!-- Right Cover -->
-        <div class="cover right"></div>
-
-        <!-- Navigation Arrows -->
-        <div class="arrow left-arrow" onclick="flipPage(-1)">❤️</div>
-        <div class="arrow right-arrow" onclick="flipPage(1)">❤️</div>
-    </div>
-
-    <script>
-        let currentPage = 0;
-        const totalPages = 8;
-        const rightPages = document.querySelectorAll('.right-page');
-
-        function flipPage(direction) {
-            if (direction === 1 && currentPage < totalPages) {
-                rightPages[currentPage].classList.add('flipped');
-                currentPage++;
-            } else if (direction === -1 && currentPage > 0) {
-                currentPage--;
-                rightPages[currentPage].classList.remove('flipped');
-            }
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>3D Flipbook</title>
-    <style>
-        /* General settings */
-        body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #f0f0f0;
-        }
-
-        /* Book container */
-        .book {
-            width: 800px;
-            height: 500px;
-            perspective: 2000px;
-            display: flex;
-            position: relative;
-        }
-
-        /* Book inner section */
-        .book-inner {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-        }
-
-        /* Cover (Bigger & Thicker) */
-        .cover {
-            position: absolute;
-            width: calc(50% + 10px);
-            height: calc(100% + 10px);
-            background: #8B0000;
-            z-index: 5;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        .cover.left { left: -5px; }
-        .cover.right { right: -5px; transform-origin: left; }
-
-        /* Pages (White, Slight Curve, Stack Effect) */
-        .page {
-            position: absolute;
-            width: 50%;
-            height: 100%;
-            background: white;
-            border: 1px solid #ddd;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-            transform-origin: left center;
-            transition: transform 0.8s;
+            backface-visibility: hidden;
         }
 
         /* Stacked Pages Effect */
