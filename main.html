@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>3D Flipbook</title>
     <style>
-        /* General body and container settings */
+        /* General settings */
         body {
             margin: 0;
             display: flex;
@@ -16,25 +16,24 @@
             background: #f0f0f0;
         }
 
-        /* Book Container */
+        /* Book container */
         .book {
             width: 800px;
             height: 500px;
             perspective: 2000px;
-            position: relative;
             display: flex;
+            position: relative;
         }
 
-        /* Book Inner */
+        /* Book inner section */
         .book-inner {
             width: 100%;
             height: 100%;
-            display: flex;
             position: relative;
             transform-style: preserve-3d;
         }
 
-        /* Cover (Thicker and Slightly Larger) */
+        /* Cover (Bigger & Thicker) */
         .cover {
             position: absolute;
             width: calc(50% + 10px);
@@ -43,10 +42,10 @@
             z-index: 5;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        .cover.left { left: 0; }
-        .cover.right { right: 0; transform-origin: left; }
+        .cover.left { left: -5px; }
+        .cover.right { right: -5px; transform-origin: left; }
 
-        /* Pages */
+        /* Pages (White, Slight Curve, Stack Effect) */
         .page {
             position: absolute;
             width: 50%;
@@ -58,8 +57,8 @@
             transition: transform 0.8s;
         }
 
-        /* Stacked Pages */
-        .stacked {
+        /* Stacked Pages Effect */
+        .stacked-page {
             position: absolute;
             width: 49%;
             height: 98%;
@@ -70,7 +69,7 @@
             transform: translateZ(-1px);
         }
 
-        /* Right Pages Flipping */
+        /* Right Page Flipping */
         .right-page {
             right: 0;
             transform-origin: left;
@@ -80,7 +79,7 @@
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
         }
 
-        /* Curved Page Effect */
+        /* Page Curvature */
         .page.flipping {
             transform: rotateY(-90deg) translateX(-2px);
         }
@@ -95,7 +94,7 @@
             text-align: center;
         }
 
-        /* Heart-shaped Navigation Arrows */
+        /* Heart Navigation Arrows */
         .arrow {
             position: absolute;
             top: 50%;
@@ -117,26 +116,41 @@
 
         <div class="book-inner">
             <!-- Stacked Pages Underneath -->
-            <div class="stacked"></div>
-            <div class="stacked"></div>
-            <div class="stacked"></div>
+            <div class="stacked-page"></div>
+            <div class="stacked-page"></div>
+            <div class="stacked-page"></div>
 
-            <!-- Left Page (Always Visible) -->
-            <div class="page left-page">
-                <div class="page-content">
-                    <a href="page1.html">
-                        <img src="your-image-1.jpg" alt="Left Page" style="max-width: 90%; max-height: 90%;">
-                    </a>
-                </div>
+            <!-- Pages -->
+            <div class="page left-page" id="leftPage">
+                <div class="page-content">Page 1</div>
             </div>
 
-            <!-- Right Page (Flips) -->
-            <div class="page right-page" id="rightPage">
-                <div class="page-content">
-                    <a href="page2.html">
-                        <img src="your-image-2.jpg" alt="Right Page" style="max-width: 90%; max-height: 90%;">
-                    </a>
-                </div>
+            <div class="page right-page" id="rightPage1">
+                <div class="page-content">Page 2</div>
+            </div>
+
+            <div class="page right-page" id="rightPage2">
+                <div class="page-content">Page 3</div>
+            </div>
+
+            <div class="page right-page" id="rightPage3">
+                <div class="page-content">Page 4</div>
+            </div>
+
+            <div class="page right-page" id="rightPage4">
+                <div class="page-content">Page 5</div>
+            </div>
+
+            <div class="page right-page" id="rightPage5">
+                <div class="page-content">Page 6</div>
+            </div>
+
+            <div class="page right-page" id="rightPage6">
+                <div class="page-content">Page 7</div>
+            </div>
+
+            <div class="page right-page" id="rightPage7">
+                <div class="page-content">Page 8</div>
             </div>
         </div>
 
@@ -149,17 +163,198 @@
     </div>
 
     <script>
-        let isFlipped = false;
+        let currentPage = 0;
+        const totalPages = 8;
+        const rightPages = document.querySelectorAll('.right-page');
 
         function flipPage(direction) {
-            const rightPage = document.getElementById('rightPage');
+            if (direction === 1 && currentPage < totalPages) {
+                rightPages[currentPage].classList.add('flipped');
+                currentPage++;
+            } else if (direction === -1 && currentPage > 0) {
+                currentPage--;
+                rightPages[currentPage].classList.remove('flipped');
+            }
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>3D Flipbook</title>
+    <style>
+        /* General settings */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
 
-            if (direction === 1 && !isFlipped) {
-                rightPage.classList.add('flipped');
-                isFlipped = true;
-            } else if (direction === -1 && isFlipped) {
-                rightPage.classList.remove('flipped');
-                isFlipped = false;
+        /* Book container */
+        .book {
+            width: 800px;
+            height: 500px;
+            perspective: 2000px;
+            display: flex;
+            position: relative;
+        }
+
+        /* Book inner section */
+        .book-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        /* Cover (Bigger & Thicker) */
+        .cover {
+            position: absolute;
+            width: calc(50% + 10px);
+            height: calc(100% + 10px);
+            background: #8B0000;
+            z-index: 5;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .cover.left { left: -5px; }
+        .cover.right { right: -5px; transform-origin: left; }
+
+        /* Pages (White, Slight Curve, Stack Effect) */
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+            transform-origin: left center;
+            transition: transform 0.8s;
+        }
+
+        /* Stacked Pages Effect */
+        .stacked-page {
+            position: absolute;
+            width: 49%;
+            height: 98%;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            z-index: 1;
+            left: 0.5%;
+            transform: translateZ(-1px);
+        }
+
+        /* Right Page Flipping */
+        .right-page {
+            right: 0;
+            transform-origin: left;
+        }
+        .right-page.flipped {
+            transform: rotateY(-180deg);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Page Curvature */
+        .page.flipping {
+            transform: rotateY(-90deg) translateX(-2px);
+        }
+
+        /* Page Content */
+        .page-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        /* Heart Navigation Arrows */
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            cursor: pointer;
+            color: #d33;
+            user-select: none;
+        }
+        
+        .left-arrow { left: -60px; }
+        .right-arrow { right: -60px; }
+    </style>
+</head>
+<body>
+    <div class="book">
+        <!-- Left Cover -->
+        <div class="cover left"></div>
+
+        <div class="book-inner">
+            <!-- Stacked Pages Underneath -->
+            <div class="stacked-page"></div>
+            <div class="stacked-page"></div>
+            <div class="stacked-page"></div>
+
+            <!-- Pages -->
+            <div class="page left-page" id="leftPage">
+                <div class="page-content">Page 1</div>
+            </div>
+
+            <div class="page right-page" id="rightPage1">
+                <div class="page-content">Page 2</div>
+            </div>
+
+            <div class="page right-page" id="rightPage2">
+                <div class="page-content">Page 3</div>
+            </div>
+
+            <div class="page right-page" id="rightPage3">
+                <div class="page-content">Page 4</div>
+            </div>
+
+            <div class="page right-page" id="rightPage4">
+                <div class="page-content">Page 5</div>
+            </div>
+
+            <div class="page right-page" id="rightPage5">
+                <div class="page-content">Page 6</div>
+            </div>
+
+            <div class="page right-page" id="rightPage6">
+                <div class="page-content">Page 7</div>
+            </div>
+
+            <div class="page right-page" id="rightPage7">
+                <div class="page-content">Page 8</div>
+            </div>
+        </div>
+
+        <!-- Right Cover -->
+        <div class="cover right"></div>
+
+        <!-- Navigation Arrows -->
+        <div class="arrow left-arrow" onclick="flipPage(-1)">❤️</div>
+        <div class="arrow right-arrow" onclick="flipPage(1)">❤️</div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const totalPages = 8;
+        const rightPages = document.querySelectorAll('.right-page');
+
+        function flipPage(direction) {
+            if (direction === 1 && currentPage < totalPages) {
+                rightPages[currentPage].classList.add('flipped');
+                currentPage++;
+            } else if (direction === -1 && currentPage > 0) {
+                currentPage--;
+                rightPages[currentPage].classList.remove('flipped');
             }
         }
     </script>
