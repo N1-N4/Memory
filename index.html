@@ -66,8 +66,8 @@
   </style>
 </head>
 <body>
-  <h1>Enter Website Password</h1>
-  <input type="password" id="loginPassword" placeholder="Enter password">
+  <h1>Enter 6 digit Ticket Code</h1>
+  <input type="password" id="loginPassword" placeholder="******">
   <button onclick="login()">Login</button>
   <p id="hintMessage">Hint: Day 1</p>
 
@@ -89,7 +89,7 @@
 
       // Check if the entered password matches the correct password
       if (enteredPassword === correctPassword) {
-        console.log("Password matched! Redirecting..."); // Password match
+        console.log("Ticket correct! Welcome..."); // Password match
         location.href = "main.html"; // Redirect to another page
       } else {
         // If it's the first failed attempt, show the hint
