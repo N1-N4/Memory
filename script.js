@@ -5,10 +5,13 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('book-container').appendChild(renderer.domElement);
 
-// Lighting
-const light = new THREE.PointLight(0xffffff, 1);
-light.position.set(10, 20, 10);
-scene.add(light);
+// Lighting (fixes black screen)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Softer ambient light
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(10, 20, 10);
+scene.add(pointLight);
 
 // Book structure
 const coverMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5E3B });
@@ -40,8 +43,8 @@ for (let i = 0; i < pageCount; i++) {
     scene.add(page);
 }
 
-// Camera position
-camera.position.set(10, 10, 20);
+// Camera position (adjusted for better view)
+camera.position.set(10, 15, 25);
 camera.lookAt(0, 0, 0);
 
 // Animation loop
