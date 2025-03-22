@@ -1,8 +1,4 @@
-
-// Ensure scene has a visible background
-scene.background = new THREE.Color(0xf0e6d2);
-
-// Scenesetup
+// Scene setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -10,13 +6,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('book-container').appendChild(renderer.domElement);
 
 // Lighting
-const light = new THREE.PointLight(0xffffff, 1);
-light.position.set(10, 20, 10);
+const light = new THREE.AmbientLight(0xffffff, 1); // Soft overall light
 scene.add(light);
-
-// Add ambient light for better visibility
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-scene.add(ambientLight);
 
 // Materials
 const coverMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5E3B });
@@ -65,11 +56,11 @@ let currentPage = 0;
 // Handle click to flip pages
 window.addEventListener('click', (event) => {
     if (flipping || currentPage >= pages.length) return;
-    
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
-    
+
     const intersects = raycaster.intersectObjects(pages);
     if (intersects.length > 0) {
         const page = pages[currentPage];
@@ -86,29 +77,26 @@ window.addEventListener('click', (event) => {
 
 // Page flip animation
 function animateFlip(page, onComplete) {
-    const targetRotation = Math.PI;
-    let progress = 0;
-    function flip() {
+    const targetRotation = Math.PI; // 180 degrees
+    const duration = 500;
+    const startTime = performance.now();
+    
+    function flipAnimation(time) {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        page.rotation.y = progress * targetRotation;
+
         if (progress < 1) {
-            progress += 0.05;
-            page.rotation.y = progress * targetRotation;
-            requestAnimationFrame(flip);
+            requestAnimationFrame(flipAnimation);
         } else {
-            page.rotation.y = targetRotation;
-            if (onComplete) onComplete();
+            onComplete();
         }
     }
-    flip();
+
+    requestAnimationFrame(flipAnimation);
 }
 
-// Resize handler
-window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-});
-
-// Animation loop
+// Animation loop for rendering
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
