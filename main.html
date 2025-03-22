@@ -4,37 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>3D Photo Album</title>
+    <title>3D Anniversary Album</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="album">
-        <div class="cover front-cover"></div>
-        <div class="pages">
-            <!-- Loop through 12 months -->
-            <script>
-                for (let i = 0; i < 12; i++) {
-                    document.write(`
-                        <div class="page" onclick="goToPage(${i})">
-                            <div class="date">${4 + i}/9/${24 + Math.floor((4 + i) / 12)}</div>
-                            <div class="photo-grid">
-                                <div class="photo frame tape"></div>
-                                <div class="photo frame"></div>
-                                <div class="photo frame tape"></div>
-                            </div>
-                        </div>
-                    `);
-                }
-            </script>
-        </div>
-        <div class="cover back-cover"></div>
-    </div>
-
-    <script>
-        function goToPage(pageNumber) {
-            alert("Go to page " + (pageNumber + 1));
-            // You can replace this alert with the code to navigate to anothe page.
-        }
-    </script>
+    <div id="book-container"></div>
+    <script src="script.js"></script>
 </body>
 </html>
