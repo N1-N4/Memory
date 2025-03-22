@@ -1,3 +1,7 @@
+
+// Ensure scene has a visible background
+scene.background = new THREE.Color(0xf0e6d2);
+
 // Scenesetup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -9,6 +13,10 @@ document.getElementById('book-container').appendChild(renderer.domElement);
 const light = new THREE.PointLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
+
+// Add ambient light for better visibility
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+scene.add(ambientLight);
 
 // Materials
 const coverMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5E3B });
