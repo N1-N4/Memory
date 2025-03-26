@@ -16,8 +16,8 @@ light.position.set(10, 20, 10);
 scene.add(light);
 
 // Materials
-const coverMaterial = new THREE.MeshPhongMaterial({ color: #FFC0CB });
-const pageMaterial = new THREE.MeshPhongMaterial({ color: #FFFFFF });
+const coverMaterial = new THREE.MeshPhongMaterial({ color: 0xFFC0CB });  // Pink color
+const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });  // White pages
 
 const coverThickness = 0.2;
 const pageThickness = 0.02;
@@ -28,8 +28,8 @@ const pageCount = 12;
 // Covers
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
-frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness / 2);
-frontCover.rotation.y = 0; // Starts closed
+frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness);  // Adjust front cover position
+frontCover.rotation.y = 0;  // Starts closed
 scene.add(frontCover);
 
 const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
@@ -44,7 +44,7 @@ for (let i = 0; i < pageCount; i++) {
         pageMaterial
     );
     page.position.set(0, 0, i * pageThickness - (pageCount * pageThickness / 2));
-    page.rotation.y = 0; // Ensures pages are properly aligned
+    page.rotation.y = 0; // Keeps pages aligned
     scene.add(page);
     pages.push(page);
 }
@@ -61,7 +61,7 @@ window.addEventListener('click', () => {
         // Open the front cover first
         isFlipping = true;
         let targetRotation = Math.PI / 2;
-        
+
         function openCover() {
             frontCover.rotation.y += 0.05;
             if (frontCover.rotation.y >= targetRotation) {
@@ -77,12 +77,12 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         // Flip pages after the cover is opened
         isFlipping = true;
-        let targetRotation = pages[currentPage].rotation.y - Math.PI;
+        let targetRotation = pages[currentPage].rotation.z - Math.PI;  // Use Z-axis for page flipping
 
         function flipPage() {
-            pages[currentPage].rotation.y -= 0.1;
-            if (pages[currentPage].rotation.y <= targetRotation) {
-                pages[currentPage].rotation.y = targetRotation;
+            pages[currentPage].rotation.z -= 0.1;  // Flip pages around the Z-axis (binding edge)
+            if (pages[currentPage].rotation.z <= targetRotation) {
+                pages[currentPage].rotation.z = targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
