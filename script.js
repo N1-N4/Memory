@@ -16,13 +16,13 @@ light.position.set(10, 20, 10);
 scene.add(light);
 
 // Materials
-const coverMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5E3B });
-const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+const coverMaterial = new THREE.MeshPhongMaterial({ color: 0xFFC0CB });
+const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
 
 const coverThickness = 0.2;
 const pageThickness = 0.02;
-const bookWidth = 6;
-const bookHeight = 8;
+const bookWidth = 8.5;
+const bookHeight = 11;
 const pageCount = 12;
 
 // Covers
