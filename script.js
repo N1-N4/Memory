@@ -1,4 +1,4 @@
-// Scene setup
+// Scene setu
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
