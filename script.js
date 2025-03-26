@@ -1,4 +1,4 @@
-// Scene setu
+// Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
@@ -28,11 +28,12 @@ const pageCount = 12;
 // Covers
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
-frontCover.position.z = pageCount * pageThickness / 2 + coverThickness / 2;
+frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness / 2);
+frontCover.rotation.y = 0; // Starts closed
 scene.add(frontCover);
 
 const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
-backCover.position.z = -pageCount * pageThickness / 2 - coverThickness / 2;
+backCover.position.set(0, 0, -pageCount * pageThickness / 2 - coverThickness / 2);
 scene.add(backCover);
 
 // Pages
@@ -42,33 +43,55 @@ for (let i = 0; i < pageCount; i++) {
         new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness),
         pageMaterial
     );
-    page.position.z = i * pageThickness - (pageCount * pageThickness / 2);
+    page.position.set(0, 0, i * pageThickness - (pageCount * pageThickness / 2));
+    page.rotation.y = 0; // Ensures pages are properly aligned
     scene.add(page);
     pages.push(page);
 }
 
-// Animation
+// Flip logic
 let isFlipping = false;
 let currentPage = 0;
+let coverOpened = false;
 
 window.addEventListener('click', () => {
-    if (isFlipping || currentPage >= pages.length) return;
+    if (isFlipping) return;
 
-    isFlipping = true;
-    const targetRotation = pages[currentPage].rotation.y + Math.PI;
-
-    function flipPage() {
-        pages[currentPage].rotation.y += 0.1;
-        if (pages[currentPage].rotation.y >= targetRotation) {
-            pages[currentPage].rotation.y = targetRotation;
-            currentPage++;
-            isFlipping = false;
-        } else {
-            requestAnimationFrame(flipPage);
+    if (!coverOpened) {
+        // Open the front cover first
+        isFlipping = true;
+        let targetRotation = Math.PI / 2;
+        
+        function openCover() {
+            frontCover.rotation.y += 0.05;
+            if (frontCover.rotation.y >= targetRotation) {
+                frontCover.rotation.y = targetRotation;
+                coverOpened = true;
+                isFlipping = false;
+            } else {
+                requestAnimationFrame(openCover);
+            }
+            renderer.render(scene, camera);
         }
-        renderer.render(scene, camera);
+        openCover();
+    } else if (currentPage < pages.length) {
+        // Flip pages after the cover is opened
+        isFlipping = true;
+        let targetRotation = pages[currentPage].rotation.y - Math.PI;
+
+        function flipPage() {
+            pages[currentPage].rotation.y -= 0.1;
+            if (pages[currentPage].rotation.y <= targetRotation) {
+                pages[currentPage].rotation.y = targetRotation;
+                currentPage++;
+                isFlipping = false;
+            } else {
+                requestAnimationFrame(flipPage);
+            }
+            renderer.render(scene, camera);
+        }
+        flipPage();
     }
-    flipPage();
 });
 
 // Resize handler
