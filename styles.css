@@ -10,13 +10,4 @@ body {
     width: 80vw;
     height: 90vh;
     cursor: grab;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Depth effect */
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    #book-container {
-        width: 95vw;
-        height: 80vh;
-    }
 }
