@@ -16,8 +16,8 @@ light.position.set(10, 20, 10);
 scene.add(light);
 
 // Materials
-const coverMaterial = new THREE.MeshPhongMaterial({ color: 0xFFC0CB });
-const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+const coverMaterial = new THREE.MeshPhongMaterial({ color: #FFC0CB });
+const pageMaterial = new THREE.MeshPhongMaterial({ color: #FFFFFF });
 
 const coverThickness = 0.2;
 const pageThickness = 0.02;
