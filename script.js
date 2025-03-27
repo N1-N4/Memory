@@ -81,8 +81,8 @@ window.addEventListener('click', () => {
 
         function flipPage() {
             pages[currentPage].rotation.z -= 0.1;  // Flip pages around the Z-axis (binding edge)
-            if (pages[currentPage].rotation.z <= targetRotation) {
-                pages[currentPage].rotation.z = targetRotation;
+            if (pages[currentPage].rotation.Y <= targetRotation) {
+                pages[currentPage].rotation.Y = targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
