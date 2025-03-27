@@ -16,8 +16,8 @@ light.position.set(10, 20, 10);
 scene.add(light);
 
 // Materials
-const coverMaterial = new THREE.MeshPhongMaterial({ color: 0xFFC0CB });  // Pink color
-const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });  // White pages
+const coverMaterial = new THREE.MeshPhongMaterial({ color: 0xFF69B4 });  // Hot Pink
+const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });   // White
 
 const coverThickness = 0.2;
 const pageThickness = 0.02;
@@ -25,28 +25,45 @@ const bookWidth = 8.5;
 const bookHeight = 11;
 const pageCount = 12;
 
-// Covers
+// Create front cover pivot group
+const frontCoverGroup = new THREE.Group();  // PIVOT POINT HERE: This group will control rotation
+scene.add(frontCoverGroup);  // Add group to scene
+
+// Create front cover
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
-frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness);  // Adjust front cover position
-frontCover.rotation.y = 0;  // Starts closed
-scene.add(frontCover);
 
+// Offset cover inside the group so it rotates from the **far left edge**
+frontCover.position.set((bookWidth + 0.2) / 2, 0, pageCount * pageThickness / 2 + coverThickness);  // Moves fully right
+frontCoverGroup.add(frontCover);  // Add cover to group
+
+// Position the group at the **far left Y-axis**
+frontCoverGroup.position.set(-bookWidth, 0, 0);  // PIVOT POINT HERE: Now at the far-left edge
+
+// Back cover (no pivot needed since it doesn’t rotate)
 const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
-backCover.position.set(0, 0, -pageCount * pageThickness / 2 - coverThickness / 2);
+backCover.position.set(-bookWidth / 2, 0, -pageCount * pageThickness / 2 - coverThickness / 2);
 scene.add(backCover);
 
-// Pages
+// Pages with pivot groups
 const pages = [];
 for (let i = 0; i < pageCount; i++) {
+    const pageGroup = new THREE.Group();  // PIVOT POINT HERE: Each page gets a pivot group
+    scene.add(pageGroup);  // Add group to scene
+
     const page = new THREE.Mesh(
         new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness),
         pageMaterial
     );
-    page.position.set(0, 0, i * pageThickness - (pageCount * pageThickness / 2));
-    page.rotation.y = 0; // Keeps pages aligned
-    scene.add(page);
-    pages.push(page);
+
+    // Offset page inside the group so it rotates from the **far left edge**
+    page.position.set(bookWidth / 2, 0, i * pageThickness - (pageCount * pageThickness / 2));  // Moves fully right
+    pageGroup.add(page);  // Add page to group
+
+    // Position the group at the **far left Y-axis**
+    pageGroup.position.set(-bookWidth, 0, 0);  // PIVOT POINT HERE: Now at the far-left edge
+
+    pages.push(pageGroup);  // Store group instead of individual page
 }
 
 // Flip logic
@@ -54,6 +71,7 @@ let isFlipping = false;
 let currentPage = 0;
 let coverOpened = false;
 
+// Open cover animation
 window.addEventListener('click', () => {
     if (isFlipping) return;
 
@@ -63,9 +81,9 @@ window.addEventListener('click', () => {
         let targetRotation = Math.PI / 2;
 
         function openCover() {
-            frontCover.rotation.y += 0.05;
-            if (frontCover.rotation.y >= targetRotation) {
-                frontCover.rotation.y = targetRotation;
+            frontCoverGroup.rotation.y += 0.05;  // Rotate the group, not the cover itself
+            if (frontCoverGroup.rotation.y >= targetRotation) {
+                frontCoverGroup.rotation.y = targetRotation;
                 coverOpened = true;
                 isFlipping = false;
             } else {
@@ -77,12 +95,12 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         // Flip pages after the cover is opened
         isFlipping = true;
-        let targetRotation = pages[currentPage].rotation.z - Math.PI;  // Use Z-axis for page flipping
+        let targetRotation = pages[currentPage].rotation.y - Math.PI;  // Rotate pages from pivot
 
         function flipPage() {
-            pages[currentPage].rotation.z -= 0.1;  // Flip pages around the Z-axis (binding edge)
-            if (pages[currentPage].rotation.Y <= targetRotation) {
-                pages[currentPage].rotation.Y = targetRotation;
+            pages[currentPage].rotation.y -= 0.1;  // Rotate page group, not individual page
+            if (pages[currentPage].rotation.y <= targetRotation) {
+                pages[currentPage].rotation.y = targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
