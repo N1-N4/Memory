@@ -3,7 +3,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(10, 10, 20);
+camera.position.set(0, 10, 20);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -31,9 +31,15 @@ const pageCount = 12;
 // Covers
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
-frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness / 2);
+
+// Set pivot to the left edge of the front cover
+frontCover.geometry.translate(-bookWidth / 2 - 0.1, 0, 0);
+
+// Correct the position to match new pivot
+frontCover.position.set(-bookWidth / 2, 0, pageCount * pageThickness / 2 + coverThickness / 2);
 frontCover.rotation.y = 0; // Starts closed
 scene.add(frontCover);
+
 
 const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
 backCover.position.set(0, 0, -pageCount * pageThickness / 2 - coverThickness / 2);
@@ -80,7 +86,7 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         // Flip pages after the cover is opened
         isFlipping = true;
-        let targetRotation = pages[currentPage].rotation.y - Math.PI;
+        let targetRotation = pages[currentPage].rotation.y + Math.PI;
 
         function flipPage() {
             pages[currentPage].rotation.y -= 0.1;
