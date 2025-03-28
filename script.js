@@ -14,10 +14,13 @@ document.getElementById('book-container').appendChild(renderer.domElement);
 const light = new THREE.PointLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
+light.intensity = 2; // Increase brightness
+
 
 // Materials
-const coverMaterial = new THREE.MeshPhongMaterial({ color: 0x8B5E3B });
-const pageMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xffc0cb, side: THREE.DoubleSide }); // Pink
+const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }); // White
+
 
 const coverThickness = 0.2;
 const pageThickness = 0.02;
