@@ -80,7 +80,7 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         // Flip pages after the cover is opened
         isFlipping = true;
-        let targetRotation = pages[currentPage].rotation.y - Math.PI;
+        let targetRotation = pages[currentPage].rotation.y + Math.PI;
 
         function flipPage() {
             pages[currentPage].rotation.y -= 0.1;
