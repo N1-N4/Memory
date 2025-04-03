@@ -91,7 +91,7 @@ window.addEventListener('click', () => {
         let targetRotation = pages[currentPage].rotation.y + Math.PI;
 
         // Set the pivot point for page flipping
-        pages[currentPage].rotation.set(2, 0, 0);  // Reset rotation
+        pages[currentPage].rotation.set(0, 0, 0);  // Reset rotation
         pages[currentPage].position.set(-bookWidth / 2, 0, pages[currentPage].position.z);
 
 
