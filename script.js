@@ -21,7 +21,7 @@ pointLight.position.set(10, 20, 10);
 scene.add(pointLight);
 
 // Materials
-const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xffc0cb, side: THREE.DoubleSide }); // Pink
+const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide }); // Pink
 const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }); // White
 
 // Book dimensions
