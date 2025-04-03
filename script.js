@@ -92,7 +92,8 @@ window.addEventListener('click', () => {
 
         // Set the pivot point for page flipping
         pages[currentPage].rotation.set(2, 0, 0);  // Reset rotation
-        pages[currentPage].position.set(bookWidth / 2, 0, pages[currentPage].position.z);  // Set pivot on right edge
+        pages[currentPage].position.set(-bookWidth / 2, 0, pages[currentPage].position.z);
+
 
         function flipPage() {
             pages[currentPage].rotation.y -= 0.1;  // Rotate around pivot
