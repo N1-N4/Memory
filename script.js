@@ -35,11 +35,17 @@ const pageCount = 12;
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
+// Create a pivot group for the front cover
+const frontCoverPivot = new THREE.Group();
+bookGroup.add(frontCoverPivot);
+
 // Covers
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
-frontCover.position.set(0, 0, pageCount * pageThickness / 2 + coverThickness / 2);
-bookGroup.add(frontCover);
+
+// Move the cover so the pivot is at the left edge (spine)
+frontCover.position.set(-bookWidth / 2, 0, pageCount * pageThickness / 2 + coverThickness / 2);
+frontCoverPivot.add(frontCover); // Add cover to pivot
 
 const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
 backCover.position.set(0, 0, -pageCount * pageThickness / 2 - coverThickness / 2);
@@ -72,11 +78,11 @@ window.addEventListener('click', () => {
         // Open the front cover first
         isFlipping = true;
         let targetRotation = Math.PI / 2;
-        
+
         function openCover() {
-            frontCover.rotation.y += 0.05;
-            if (frontCover.rotation.y >= targetRotation) {
-                frontCover.rotation.y = targetRotation;
+            frontCoverPivot.rotation.y += 0.05; // Rotate the pivot group
+            if (frontCoverPivot.rotation.y >= targetRotation) {
+                frontCoverPivot.rotation.y = targetRotation;
                 coverOpened = true;
                 isFlipping = false;
             } else {
@@ -93,7 +99,6 @@ window.addEventListener('click', () => {
         // Set the pivot point for page flipping
         pages[currentPage].rotation.set(0, 0, 0);  // Reset rotation
         pages[currentPage].position.set(-bookWidth / 2, 0, pages[currentPage].position.z);
-
 
         function flipPage() {
             pages[currentPage].rotation.y -= 0.1;  // Rotate around pivot
