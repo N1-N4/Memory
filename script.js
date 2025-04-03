@@ -3,7 +3,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
 // Camera setup
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(0, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(5, 5, 10);  // Adjusted camera closer to book
 camera.lookAt(0, 0, 0);
 
