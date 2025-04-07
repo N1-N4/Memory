@@ -1,18 +1,23 @@
+// Grab the container and match its size
+const container = document.getElementById('book-container');
+const containerWidth = container.clientWidth;
+const containerHeight = container.clientHeight;
+
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
 // Camera setup
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 1000);
 camera.position.set(8, 5, 12);
 camera.lookAt(0, 0, 0);
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById('book-container').appendChild(renderer.domElement);
+renderer.setSize(containerWidth, containerHeight);
+container.appendChild(renderer.domElement);
 
-// Lighting setup
+// Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
 scene.add(ambientLight);
 
@@ -35,19 +40,24 @@ const pageCount = 12;
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
-// Front cover with pivot
+// Covers
+const totalBookThickness = pageCount * pageThickness;
+
+// Front cover
 const frontCoverPivot = new THREE.Group();
 bookGroup.add(frontCoverPivot);
 
-const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-coverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);  // Move pivot to spine
-const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
+const frontCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+frontCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
+const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
 frontCoverPivot.add(frontCover);
+frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2);
 
 // Back cover
 const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-backCoverGeometry.translate(-(bookWidth + 0.2) / 2, 0, 0); // Pivot at spine (left)
+backCoverGeometry.translate(-(bookWidth + 0.2) / 2, 0, 0);
 const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
+backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2);
 bookGroup.add(backCover);
 
 // Pages
@@ -57,17 +67,19 @@ for (let i = 0; i < pageCount; i++) {
     bookGroup.add(pagePivot);
 
     const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
-    pageGeometry.translate(bookWidth / 2, 0, 0);  // Shift pivot to spine edge (left side)
+    pageGeometry.translate(bookWidth / 2, 0, 0); // pivot at spine
 
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
     pagePivot.add(page);
 
-    pagePivot.position.set(-bookWidth / 2, 0, i * pageThickness - (pageCount * pageThickness / 2));
+    const zOffset = (i - pageCount / 2) * (pageThickness + 0.001);
+    pagePivot.position.set(-bookWidth / 2, 0, zOffset);
+
     pages.push(pagePivot);
 }
 
-// Adjust book position
-bookGroup.position.set(0, 0, 1);
+// Center the book
+bookGroup.position.set(0, 0, 0);
 
 // Flip logic
 let isFlipping = false;
@@ -113,14 +125,17 @@ window.addEventListener('click', () => {
     }
 });
 
-// Resize
+// Resize handler — resizes with CSS container
 window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const newWidth = container.clientWidth;
+    const newHeight = container.clientHeight;
+
+    renderer.setSize(newWidth, newHeight);
+    camera.aspect = newWidth / newHeight;
     camera.updateProjectionMatrix();
 });
 
-// Animate
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
