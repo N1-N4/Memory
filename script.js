@@ -112,8 +112,8 @@ window.addEventListener('click', () => {
 
         function flipPage() {
             page.rotation.y -= 0.1;
-            if (page.rotation.y <= -targetRotation) {
-                page.rotation.y = -targetRotation;
+            if (page.rotation.y <= targetRotation) {
+                page.rotation.y = targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
