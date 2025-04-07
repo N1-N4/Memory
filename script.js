@@ -94,9 +94,9 @@ window.addEventListener('click', () => {
         const targetRotation = Math.PI / 2;
 
         function openCover() {
-            frontCoverPivot.rotation.y += 0.05;
-            if (frontCoverPivot.rotation.y >= targetRotation) {
-                frontCoverPivot.rotation.y = targetRotation;
+            frontCoverPivot.rotation.y -= 0.05;
+            if (frontCoverPivot.rotation.y <= -targetRotation) {
+                frontCoverPivot.rotation.y = -targetRotation;
                 coverOpened = true;
                 isFlipping = false;
             } else {
@@ -108,12 +108,12 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         isFlipping = true;
         const page = pages[currentPage];
-        const targetRotation = page.rotation.y + Math.PI / 2;
+        const targetRotation = page.rotation.y - Math.PI / 2;
 
         function flipPage() {
-            page.rotation.y += 0.1;
-            if (page.rotation.y >= targetRotation) {
-                page.rotation.y = targetRotation;
+            page.rotation.y -= 0.1;
+            if (page.rotation.y <= -targetRotation) {
+                page.rotation.y = -targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
