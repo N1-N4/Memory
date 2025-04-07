@@ -9,7 +9,7 @@ scene.background = new THREE.Color(0xf0e6d2);
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 1000);
-camera.position.set(8, 5, 12);
+camera.position.set(10, 6, 14); // adjusted to better view closed book
 camera.lookAt(0, 0, 0);
 
 // Renderer setup
@@ -48,16 +48,16 @@ const frontCoverPivot = new THREE.Group();
 bookGroup.add(frontCoverPivot);
 
 const frontCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-frontCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
+frontCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0); // pivot on left
 const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
 frontCoverPivot.add(frontCover);
-frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2);
+frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2 + 0.01); // slightly above pages
 
 // Back cover
 const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-backCoverGeometry.translate(-(bookWidth + 0.2) / 2, 0, 0);
+backCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0); // match pivot style
 const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
-backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2);
+backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
 bookGroup.add(backCover);
 
 // Pages
@@ -67,12 +67,12 @@ for (let i = 0; i < pageCount; i++) {
     bookGroup.add(pagePivot);
 
     const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
-    pageGeometry.translate(bookWidth / 2, 0, 0); // pivot at spine
+    pageGeometry.translate(bookWidth / 2, 0, 0); // pivot at spine (left)
 
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
     pagePivot.add(page);
 
-    const zOffset = (i - pageCount / 2) * (pageThickness + 0.001);
+    const zOffset = i * (pageThickness + 0.005); // stack slightly forward
     pagePivot.position.set(-bookWidth / 2, 0, zOffset);
 
     pages.push(pagePivot);
