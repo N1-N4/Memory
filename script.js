@@ -1,4 +1,4 @@
-// Page flipping logic with more pronounced curvature at the end and proper stacking
+// Page flipping logic with more pronounced curvature at the end and proper stackin
 let isFlipping = false;
 let currentPage = 0;
 let coverOpened = false;
