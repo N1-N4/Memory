@@ -4,7 +4,7 @@ scene.background = new THREE.Color(0xf0e6d2);
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(8, 5, 12);  // Adjusted camera for better view
+camera.position.set(8, 5, 12);
 camera.lookAt(0, 0, 0);
 
 // Renderer setup
@@ -21,8 +21,8 @@ pointLight.position.set(10, 20, 10);
 scene.add(pointLight);
 
 // Materials
-const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide }); // Pink
-const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }); // White
+const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide });
+const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
 // Book dimensions
 const coverThickness = 0.2;
@@ -31,49 +31,45 @@ const bookWidth = 6;
 const bookHeight = 8;
 const pageCount = 12;
 
-// Book group - keeps all parts together
+// Book group
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
-// Create a pivot group for the front cover
+// Front cover with pivot
 const frontCoverPivot = new THREE.Group();
 bookGroup.add(frontCoverPivot);
 
-// Covers
 const coverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+coverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);  // Move pivot to spine
 const frontCover = new THREE.Mesh(coverGeometry, coverMaterial);
+frontCoverPivot.add(frontCover);
 
-// Move the front cover so the pivot is at the spine
-frontCover.position.set(bookWidth / 2, 0, 0);
-frontCoverPivot.add(frontCover); // Add cover to pivot
-
-const backCover = new THREE.Mesh(coverGeometry, coverMaterial);
-backCover.position.set(-bookWidth / 2, 0, 0); // Back cover fixed at spine
+// Back cover
+const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+backCoverGeometry.translate(-(bookWidth + 0.2) / 2, 0, 0); // Pivot at spine (left)
+const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
 bookGroup.add(backCover);
 
 // Pages
 const pages = [];
 for (let i = 0; i < pageCount; i++) {
-    const pagePivot = new THREE.Group(); // Each page gets a pivot
+    const pagePivot = new THREE.Group();
     bookGroup.add(pagePivot);
 
-    const page = new THREE.Mesh(
-        new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness),
-        pageMaterial
-    );
-    
-    // Move page so it pivots from the spine
-    page.position.set(bookWidth / 2, 0, 0);
-    pagePivot.position.set(-bookWidth / 2, 0, i * pageThickness - (pageCount * pageThickness / 2));
-    
+    const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
+    pageGeometry.translate(bookWidth / 2, 0, 0);  // Shift pivot to spine edge (left side)
+
+    const page = new THREE.Mesh(pageGeometry, pageMaterial);
     pagePivot.add(page);
+
+    pagePivot.position.set(-bookWidth / 2, 0, i * pageThickness - (pageCount * pageThickness / 2));
     pages.push(pagePivot);
 }
 
-// Center book slightly forward for better visibility
+// Adjust book position
 bookGroup.position.set(0, 0, 1);
 
-// Flip logic - ensure pivot is correct for page flipping
+// Flip logic
 let isFlipping = false;
 let currentPage = 0;
 let coverOpened = false;
@@ -82,12 +78,11 @@ window.addEventListener('click', () => {
     if (isFlipping) return;
 
     if (!coverOpened) {
-        // Open the front cover first
         isFlipping = true;
-        let targetRotation = Math.PI / 2;
+        const targetRotation = Math.PI / 2;
 
         function openCover() {
-            frontCoverPivot.rotation.y += 0.05; // Rotate the pivot group
+            frontCoverPivot.rotation.y += 0.05;
             if (frontCoverPivot.rotation.y >= targetRotation) {
                 frontCoverPivot.rotation.y = targetRotation;
                 coverOpened = true;
@@ -99,14 +94,14 @@ window.addEventListener('click', () => {
         }
         openCover();
     } else if (currentPage < pages.length) {
-        // Flip pages after the cover is opened
         isFlipping = true;
-        let targetRotation = pages[currentPage].rotation.y + Math.PI / 2;
+        const page = pages[currentPage];
+        const targetRotation = page.rotation.y + Math.PI / 2;
 
         function flipPage() {
-            pages[currentPage].rotation.y += 0.1;  // Rotate around pivot
-            if (pages[currentPage].rotation.y >= targetRotation) {
-                pages[currentPage].rotation.y = targetRotation;
+            page.rotation.y += 0.1;
+            if (page.rotation.y >= targetRotation) {
+                page.rotation.y = targetRotation;
                 currentPage++;
                 isFlipping = false;
             } else {
@@ -118,14 +113,14 @@ window.addEventListener('click', () => {
     }
 });
 
-// Resize handler
+// Resize
 window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 });
 
-// Animation loop
+// Animate
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
