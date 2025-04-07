@@ -66,7 +66,7 @@ for (let i = 0; i < pageCount; i++) {
     const pagePivot = new THREE.Group();
     bookGroup.add(pagePivot);
 
-    const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
+    const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1); // More segments for bending
     pageGeometry.translate(bookWidth / 2, 0, 0); // pivot at spine (left)
 
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
@@ -111,16 +111,45 @@ window.addEventListener('click', () => {
         const targetRotation = page.rotation.y - Math.PI;
 
         function flipPage() {
-            page.rotation.y -= 0.1;
+            const pageMesh = page.children[0]; // Accessing the page mesh
+            const geometry = pageMesh.geometry;
+            const position = geometry.attributes.position;
+            const vertexCount = position.count;
+
+            const maxRotation = Math.PI; // flip 180 degrees
+            const step = 0.05;
+            const progress = Math.min(Math.abs(page.rotation.y / maxRotation), 1);
+
+            page.rotation.y -= step;
+
+            // Apply a bend to the page geometry as it flips
+            for (let i = 0; i < vertexCount; i++) {
+                const x = position.getX(i);
+                const normalizedX = (x + bookWidth / 2) / bookWidth; // Normalize the x-coordinate
+                const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress; // Bend based on rotation progress
+                position.setZ(i, curve);
+            }
+            position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+
+            // Done flipping
             if (page.rotation.y <= targetRotation) {
                 page.rotation.y = targetRotation;
+
+                // Reset curvature when the page flip is done
+                for (let i = 0; i < vertexCount; i++) {
+                    position.setZ(i, 0);
+                }
+                position.needsUpdate = true;
+
                 currentPage++;
                 isFlipping = false;
             } else {
                 requestAnimationFrame(flipPage);
             }
-            renderer.render(scene, camera);
         }
+
         flipPage();
     }
 });
