@@ -152,6 +152,8 @@ window.addEventListener('click', () => {
     } else {
         requestAnimationFrame(flipPage);
     }
+}
+
 });
 
 // Resize handler — resizes with CSS container
