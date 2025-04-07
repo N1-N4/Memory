@@ -91,7 +91,7 @@ window.addEventListener('click', () => {
 
     if (!coverOpened) {
         isFlipping = true;
-        const targetRotation = Math.PI / 2;
+        const targetRotation = Math.PI;
 
         function openCover() {
             frontCoverPivot.rotation.y -= 0.05;
@@ -108,7 +108,7 @@ window.addEventListener('click', () => {
     } else if (currentPage < pages.length) {
         isFlipping = true;
         const page = pages[currentPage];
-        const targetRotation = page.rotation.y - Math.PI / 2;
+        const targetRotation = page.rotation.y - Math.PI;
 
         function flipPage() {
             page.rotation.y -= 0.1;
