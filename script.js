@@ -66,8 +66,8 @@ for (let i = 0; i < pageCount; i++) {
     const pagePivot = new THREE.Group();
     bookGroup.add(pagePivot);
 
-    const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
-    pageGeometry.translate(bookWidth / 2, 0, 0); // pivot at spine (left)
+    const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1); // 20 segments for horizontal bend
+pageGeometry.translate(bookWidth / 2, 0, 0); // pivot on the left
 
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
     pagePivot.add(page);
@@ -111,17 +111,46 @@ window.addEventListener('click', () => {
         const targetRotation = page.rotation.y - Math.PI;
 
         function flipPage() {
-            page.rotation.y -= 0.1;
-            if (page.rotation.y <= targetRotation) {
-                page.rotation.y = targetRotation;
-                currentPage++;
-                isFlipping = false;
-            } else {
-                requestAnimationFrame(flipPage);
-            }
-            renderer.render(scene, camera);
+    const page = pages[currentPage];
+    const mesh = page.children[0]; // the actual page mesh
+    const geometry = mesh.geometry;
+    const position = geometry.attributes.position;
+    const vertexCount = position.count;
+
+    const maxRotation = Math.PI; // flip 180 degrees
+    const step = 0.05;
+
+    // Animate rotation
+    page.rotation.y -= step;
+
+    // Get flip progress: 1 when starting, 0 when done
+    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
+
+    // Bend the page based on progress
+    for (let i = 0; i < vertexCount; i++) {
+        const x = position.getX(i);
+        const normalizedX = x / bookWidth; // 0 to 1 across the width
+        const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
+        position.setZ(i, curve);
+    }
+    position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+
+    // Done flipping
+    if (page.rotation.y <= -maxRotation) {
+        page.rotation.y = -maxRotation;
+
+        // Reset curvature
+        for (let i = 0; i < vertexCount; i++) {
+            position.setZ(i, 0);
         }
-        flipPage();
+        position.needsUpdate = true;
+
+        currentPage++;
+        isFlipping = false;
+    } else {
+        requestAnimationFrame(flipPage);
     }
 });
 
