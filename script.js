@@ -40,7 +40,7 @@ const pageCount = 12;
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
-const totalBookThickness = pageCount * (pageThickness + 0.005);
+const totalBookThickness = pageCount * pageThickness;
 
 // Front cover
 const frontCoverPivot = new THREE.Group();
@@ -69,8 +69,6 @@ for (let i = 0; i < pageCount; i++) {
     pageGeometry.translate(bookWidth / 2, 0, 0);
 
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
-    page.castShadow = true;
-    page.receiveShadow = true;
     pagePivot.add(page);
 
     const zOffset = i * (pageThickness + 0.005);
@@ -82,6 +80,7 @@ for (let i = 0; i < pageCount; i++) {
 // Center book
 bookGroup.position.set(0, 0, 0);
 
+// Flip logic
 let isFlipping = false;
 let currentPage = 0;
 let coverOpened = false;
@@ -107,52 +106,57 @@ window.addEventListener('click', () => {
         openCover();
     } else if (currentPage < pages.length) {
         isFlipping = true;
-        const page = pages[currentPage];
-        const mesh = page.children[0];
-        const geometry = mesh.geometry;
-        const position = geometry.attributes.position;
-        const vertexCount = position.count;
-
-        const maxRotation = Math.PI;
-        const step = 0.05;
-
-        function flipPage() {
-            page.rotation.y -= step;
-            const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
-
-            for (let i = 0; i < vertexCount; i++) {
-                const x = position.getX(i);
-                const normalizedX = x / bookWidth;
-                const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
-                position.setZ(i, curve);
-            }
-            position.needsUpdate = true;
-
-            renderer.render(scene, camera);
-
-            if (page.rotation.y <= -maxRotation) {
-                page.rotation.y = -maxRotation;
-
-                // Stack flipped page on right side
-                page.position.z = -totalBookThickness / 2 - coverThickness - (currentPage * (pageThickness + 0.005));
-                page.position.x = bookWidth / 2;
-
-                for (let i = 0; i < vertexCount; i++) {
-                    position.setZ(i, 0);
-                }
-                position.needsUpdate = true;
-
-                currentPage++;
-                isFlipping = false;
-            } else {
-                requestAnimationFrame(flipPage);
-            }
-        }
-
         flipPage();
     }
 });
 
+function flipPage() {
+    const page = pages[currentPage];
+    const mesh = page.children[0];
+    const geometry = mesh.geometry;
+    const position = geometry.attributes.position;
+    const vertexCount = position.count;
+
+    const maxRotation = Math.PI;
+    const step = 0.05;
+
+    page.rotation.y -= step;
+
+    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
+
+    for (let i = 0; i < vertexCount; i++) {
+        const x = position.getX(i);
+        const normalizedX = x / bookWidth;
+        const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
+        position.setZ(i, curve);
+    }
+    position.needsUpdate = true;
+    renderer.render(scene, camera);
+
+    if (page.rotation.y <= -maxRotation) {
+        page.rotation.y = -maxRotation;
+
+        for (let i = 0; i < vertexCount; i++) {
+            const x = position.getX(i);
+            const normalizedX = x / bookWidth;
+            const curve = Math.sin(normalizedX * Math.PI) * 0.1;
+            position.setZ(i, curve);
+        }
+        position.needsUpdate = true;
+
+        const flippedZOffset = -currentPage * (pageThickness + 0.005);
+        page.position.set(-bookWidth / 2, 0, flippedZOffset);
+        page.rotation.y = -Math.PI;
+        page.rotation.z = currentPage * 0.01;
+
+        currentPage++;
+        isFlipping = false;
+    } else {
+        requestAnimationFrame(flipPage);
+    }
+}
+
+// Resize handler
 window.addEventListener('resize', () => {
     const newWidth = container.clientWidth;
     const newHeight = container.clientHeight;
@@ -162,6 +166,7 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
 });
 
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
