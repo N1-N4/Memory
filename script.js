@@ -26,7 +26,7 @@ pointLight.position.set(10, 20, 10);
 scene.add(pointLight);
 
 // Materials
-const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xffd1df, side: THREE.DoubleSide });
+const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide });
 const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
 // Book dimensions
@@ -35,13 +35,11 @@ const pageThickness = 0.02;
 const bookWidth = 6;
 const bookHeight = 8;
 const pageCount = 12;
-const flippedStackOffset = 0.03;
 
 // Book group
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
-// Covers
 const totalBookThickness = pageCount * pageThickness;
 
 // Front cover
@@ -67,13 +65,14 @@ for (let i = 0; i < pageCount; i++) {
     const pagePivot = new THREE.Group();
     bookGroup.add(pagePivot);
 
-    const pageGeometry = new THREE.BoxGeometry(bookWidth, bookHeight, pageThickness);
+    const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
     pageGeometry.translate(bookWidth / 2, 0, 0);
+
     const page = new THREE.Mesh(pageGeometry, pageMaterial);
     pagePivot.add(page);
 
     const zOffset = i * (pageThickness + 0.005);
-    pagePivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 - zOffset);
+    pagePivot.position.set(-bookWidth / 2, 0, zOffset);
 
     pages.push(pagePivot);
 }
@@ -107,37 +106,67 @@ window.addEventListener('click', () => {
         openCover();
     } else if (currentPage < pages.length) {
         isFlipping = true;
-        const page = pages[currentPage];
-        const startRotation = page.rotation.y;
-        const targetRotation = startRotation - Math.PI;
-
-        function flipPage() {
-            page.rotation.y -= 0.1;
-            if (page.rotation.y <= targetRotation) {
-                page.rotation.y = targetRotation;
-                // Move page to other side after flip
-                page.position.x += bookWidth;
-                page.position.z = -currentPage * flippedStackOffset;
-                currentPage++;
-                isFlipping = false;
-            } else {
-                requestAnimationFrame(flipPage);
-            }
-            renderer.render(scene, camera);
-        }
         flipPage();
     }
 });
 
-// Resize
+function flipPage() {
+    const page = pages[currentPage];
+    const mesh = page.children[0];
+    const geometry = mesh.geometry;
+    const position = geometry.attributes.position;
+    const vertexCount = position.count;
+
+    const maxRotation = Math.PI;
+    const step = 0.05;
+
+    page.rotation.y -= step;
+
+    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
+
+    for (let i = 0; i < vertexCount; i++) {
+        const x = position.getX(i);
+        const normalizedX = x / bookWidth;
+        const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
+        position.setZ(i, curve);
+    }
+    position.needsUpdate = true;
+    renderer.render(scene, camera);
+
+    if (page.rotation.y <= -maxRotation) {
+        page.rotation.y = -maxRotation;
+
+        for (let i = 0; i < vertexCount; i++) {
+            const x = position.getX(i);
+            const normalizedX = x / bookWidth;
+            const curve = Math.sin(normalizedX * Math.PI) * 0.1;
+            position.setZ(i, curve);
+        }
+        position.needsUpdate = true;
+
+        const flippedZOffset = -currentPage * (pageThickness + 0.005);
+        page.position.set(-bookWidth / 2, 0, flippedZOffset);
+        page.rotation.y = -Math.PI;
+        page.rotation.z = currentPage * 0.01;
+
+        currentPage++;
+        isFlipping = false;
+    } else {
+        requestAnimationFrame(flipPage);
+    }
+}
+
+// Resize handler
 window.addEventListener('resize', () => {
     const newWidth = container.clientWidth;
     const newHeight = container.clientHeight;
+
     renderer.setSize(newWidth, newHeight);
     camera.aspect = newWidth / newHeight;
     camera.updateProjectionMatrix();
 });
 
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
