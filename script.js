@@ -7,9 +7,9 @@ const containerHeight = container.clientHeight;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0e6d2);
 
-// Camera setup (front-facing)
+// Camera setup
 const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 1000);
-camera.position.set(0, 0, 20);
+camera.position.set(0, 5, 18); // face-on view
 camera.lookAt(0, 0, 0);
 
 // Renderer setup
@@ -29,7 +29,7 @@ scene.add(pointLight);
 const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide });
 const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
-// Book dimension
+// Book dimensions
 const coverThickness = 0.2;
 const pageThickness = 0.02;
 const bookWidth = 6;
@@ -39,74 +39,9 @@ const pageCount = 12;
 // Book group
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
-
 const totalBookThickness = pageCount * pageThickness;
 
-// Preload textures
-const textureLoader = new THREE.TextureLoader();
-const imagePaths = [
-  'images/IMG_1800.png', 'images/IMG_1801.png', 'images/photo3.jpg', 'images/photo4.jpg',
-  'images/photo5.jpg', 'images/photo6.jpg', 'images/photo7.jpg', 'images/photo8.jpg',
-  'images/photo9.jpg', 'images/photo10.jpg', 'images/photo11.jpg', 'images/photo12.jpg'
-];
-
-const links = [
-  'https://example.com/1', 'https://example.com/2', 'https://example.com/3', 'https://example.com/4',
-  'https://example.com/5', 'https://example.com/6', 'https://example.com/7', 'https://example.com/8',
-  'https://example.com/9', 'https://example.com/10', 'https://example.com/11', 'https://example.com/12'
-];
-
-// Pages
-const pages = [];
-const clickablePhotos = [];
-
-for (let i = 0; i < pageCount; i++) {
-  const pagePivot = new THREE.Group();
-  bookGroup.add(pagePivot);
-
-  // Base page
-  const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
-  pageGeometry.translate(bookWidth / 2, 0, 0);
-  const basePage = new THREE.Mesh(pageGeometry, pageMaterial);
-  pagePivot.add(basePage);
-
-  // Load image texture
-  const texture = textureLoader.load(imagePaths[i]);
-  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-  // Smaller photo
-  const photoWidth = bookWidth * 0.6;
-  const photoHeight = bookHeight * 0.6;
-  const photoGeometry = new THREE.PlaneGeometry(photoWidth, photoHeight);
-  const photoMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-
-  const photoMesh = new THREE.Mesh(photoGeometry, photoMaterial);
-  photoMesh.position.set(bookWidth * 0.5, 0, 0.001);
-  pagePivot.add(photoMesh);
-
-  // Optional border
-  const borderMaterial = new THREE.LineBasicMaterial({ color: 0x999999 });
-  const borderGeometry = new THREE.EdgesGeometry(photoGeometry);
-  const borderLines = new THREE.LineSegments(borderGeometry, borderMaterial);
-  borderLines.position.copy(photoMesh.position);
-  pagePivot.add(borderLines);
-
-  // Position stacking
-  const zOffset = i * (pageThickness + 0.005);
-  pagePivot.position.set(-bookWidth / 2, 0, zOffset);
-
-  pages.push(pagePivot);
-  clickablePhotos.push({ mesh: photoMesh, url: links[i] });
-}
-
-// Back cover
-const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-backCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
-const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
-backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
-bookGroup.add(backCover);
-
-// Front cover (moved below pages to fix stacking)
+// Front cover
 const frontCoverPivot = new THREE.Group();
 bookGroup.add(frontCoverPivot);
 
@@ -116,118 +51,167 @@ const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
 frontCoverPivot.add(frontCover);
 frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2 + 0.01);
 
-// Center book
-bookGroup.position.set(0, 0, 0);
+// Back cover
+const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+backCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
+const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
+backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
+bookGroup.add(backCover);
 
-// Flip logic
-let isFlipping = false;
-let currentPage = 0;
-let coverOpened = false;
-
-window.addEventListener('click', () => {
-  if (isFlipping) return;
-
-  if (!coverOpened) {
-    isFlipping = true;
-    const targetRotation = Math.PI;
-
-    function openCover() {
-      frontCoverPivot.rotation.y -= 0.05;
-      if (frontCoverPivot.rotation.y <= -targetRotation) {
-        frontCoverPivot.rotation.y = -targetRotation;
-        coverOpened = true;
-        isFlipping = false;
-      } else {
-        requestAnimationFrame(openCover);
-      }
-      renderer.render(scene, camera);
-    }
-    openCover();
-  } else if (currentPage < pages.length) {
-    isFlipping = true;
-    flipPage();
-  }
-});
-
-function flipPage() {
-  const page = pages[currentPage];
-  const mesh = page.children[0];
-  const geometry = mesh.geometry;
-  const position = geometry.attributes.position;
-  const vertexCount = position.count;
-
-  const maxRotation = Math.PI;
-  const step = 0.05;
-
-  page.rotation.y -= step;
-
-  const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
-
-  for (let i = 0; i < vertexCount; i++) {
-    const x = position.getX(i);
-    const normalizedX = x / bookWidth;
-    const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
-    position.setZ(i, curve);
-  }
-  position.needsUpdate = true;
-  renderer.render(scene, camera);
-
-  if (page.rotation.y <= -maxRotation) {
-    page.rotation.y = -maxRotation;
-
-    for (let i = 0; i < vertexCount; i++) {
-      const x = position.getX(i);
-      const normalizedX = x / bookWidth;
-      const curve = Math.sin(normalizedX * Math.PI) * 0.1;
-      position.setZ(i, curve);
-    }
-    position.needsUpdate = true;
-
-    const flippedZOffset = -(pageCount - currentPage - 1) * (pageThickness + 0.005);
-    page.position.set(-bookWidth / 2, 0, flippedZOffset);
-    page.rotation.y = -Math.PI;
-
-    page.rotation.z = (currentPage % 2 === 0 ? 1 : -1) * currentPage * 0.002;
-
-    currentPage++;
-    isFlipping = false;
-  } else {
-    requestAnimationFrame(flipPage);
-  }
+// Date links
+const dateLinks = [];
+for (let i = 0; i < 12; i++) {
+    const date = new Date(2024, 3 + i, 9); // 4/9/24 is month 3 (0-indexed)
+    const dateString = `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(2)}`;
+    const link = `https://example.com/page${i + 1}`; // Change to real links
+    dateLinks.push({ text: dateString, url: link });
 }
 
-// Raycaster for clickable images
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+// Font loader
+const fontLoader = new THREE.FontLoader();
+fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
 
-window.addEventListener('click', (event) => {
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    const pages = [];
+    for (let i = 0; i < pageCount; i++) {
+        const pagePivot = new THREE.Group();
+        bookGroup.add(pagePivot);
 
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(clickablePhotos.map(obj => obj.mesh));
+        // Base page
+        const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
+        pageGeometry.translate(bookWidth / 2, 0, 0);
+        const basePage = new THREE.Mesh(pageGeometry, pageMaterial);
+        pagePivot.add(basePage);
 
-  if (intersects.length > 0) {
-    const clicked = intersects[0].object;
-    const match = clickablePhotos.find(obj => obj.mesh === clicked);
-    if (match) window.open(match.url, '_blank');
-  }
+        // Text
+        const textGeo = new THREE.TextGeometry(dateLinks[i].text, {
+            font: font,
+            size: 0.5,
+            height: 0.05,
+        });
+
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const textMesh = new THREE.Mesh(textGeo, textMaterial);
+        textMesh.position.set(bookWidth * 0.5 - 1.5, -0.5, 0.01);
+        textMesh.userData = { url: dateLinks[i].url }; // Store link
+
+        pagePivot.add(textMesh);
+
+        // Z position
+        const zOffset = i * (pageThickness + 0.005);
+        pagePivot.position.set(-bookWidth / 2, 0, zOffset);
+        pages.push(pagePivot);
+    }
+
+    // Flip logic
+    let isFlipping = false;
+    let currentPage = 0;
+    let coverOpened = false;
+
+    window.addEventListener('click', (event) => {
+        if (isFlipping) return;
+
+        // Raycast for click detection
+        const mouse = new THREE.Vector2(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            -(event.clientY / window.innerHeight) * 2 + 1
+        );
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+
+        if (intersects.length > 0) {
+            const clicked = intersects[0].object;
+            if (clicked.userData.url) {
+                window.open(clicked.userData.url, '_blank');
+                return;
+            }
+        }
+
+        // Open cover
+        if (!coverOpened) {
+            isFlipping = true;
+            const targetRotation = Math.PI;
+
+            function openCover() {
+                frontCoverPivot.rotation.y -= 0.05;
+                if (frontCoverPivot.rotation.y <= -targetRotation) {
+                    frontCoverPivot.rotation.y = -targetRotation;
+                    coverOpened = true;
+                    isFlipping = false;
+                } else {
+                    requestAnimationFrame(openCover);
+                }
+                renderer.render(scene, camera);
+            }
+            openCover();
+        } else if (currentPage < pages.length) {
+            isFlipping = true;
+            flipPage();
+        }
+    });
+
+    function flipPage() {
+        const page = pages[currentPage];
+        const mesh = page.children[0];
+        const geometry = mesh.geometry;
+        const position = geometry.attributes.position;
+        const vertexCount = position.count;
+
+        const maxRotation = Math.PI;
+        const step = 0.05;
+
+        page.rotation.y -= step;
+
+        const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
+
+        for (let i = 0; i < vertexCount; i++) {
+            const x = position.getX(i);
+            const normalizedX = x / bookWidth;
+            const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
+            position.setZ(i, curve);
+        }
+        position.needsUpdate = true;
+        renderer.render(scene, camera);
+
+        if (page.rotation.y <= -maxRotation) {
+            page.rotation.y = -maxRotation;
+
+            for (let i = 0; i < vertexCount; i++) {
+                const x = position.getX(i);
+                const normalizedX = x / bookWidth;
+                const curve = Math.sin(normalizedX * Math.PI) * 0.1;
+                position.setZ(i, curve);
+            }
+            position.needsUpdate = true;
+
+            const flippedZOffset = -(pageCount - currentPage - 1) * (pageThickness + 0.005);
+            page.position.set(-bookWidth / 2, 0, flippedZOffset);
+            page.rotation.y = -Math.PI;
+            page.rotation.z = (currentPage % 2 === 0 ? 1 : -1) * currentPage * 0.002;
+
+            currentPage++;
+            isFlipping = false;
+        } else {
+            requestAnimationFrame(flipPage);
+        }
+    }
+
+    animate();
 });
 
 // Resize handler
 window.addEventListener('resize', () => {
-  const newWidth = container.clientWidth;
-  const newHeight = container.clientHeight;
+    const newWidth = container.clientWidth;
+    const newHeight = container.clientHeight;
 
-  renderer.setSize(newWidth, newHeight);
-  camera.aspect = newWidth / newHeight;
-  camera.updateProjectionMatrix();
+    renderer.setSize(newWidth, newHeight);
+    camera.aspect = newWidth / newHeight;
+    camera.updateProjectionMatrix();
 });
 
 // Animation loop
 function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
 }
-animate();
