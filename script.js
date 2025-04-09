@@ -29,7 +29,7 @@ scene.add(pointLight);
 const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide });
 const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
-// Book dimensions
+// Book dimension
 const coverThickness = 0.2;
 const pageThickness = 0.02;
 const bookWidth = 6;
@@ -59,23 +59,54 @@ const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
 backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
 bookGroup.add(backCover);
 
+// Preload textures
+const textureLoader = new THREE.TextureLoader();
+const imagePaths = [
+  'images/photo1.jpg', 'images/photo2.jpg', 'images/photo3.jpg', 'images/photo4.jpg',
+  'images/photo5.jpg', 'images/photo6.jpg', 'images/photo7.jpg', 'images/photo8.jpg',
+  'images/photo9.jpg', 'images/photo10.jpg', 'images/photo11.jpg', 'images/photo12.jpg'
+];
+
 // Pages
 const pages = [];
 for (let i = 0; i < pageCount; i++) {
     const pagePivot = new THREE.Group();
     bookGroup.add(pagePivot);
 
+    // Base page – full size, acts like the paper
     const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
     pageGeometry.translate(bookWidth / 2, 0, 0);
+    const basePage = new THREE.Mesh(pageGeometry, pageMaterial);
+    pagePivot.add(basePage);
 
-    const page = new THREE.Mesh(pageGeometry, pageMaterial);
-    pagePivot.add(page);
+    // Load image texture
+    const texture = textureLoader.load(imagePaths[i]);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
+    // Smaller photo on the page
+    const photoWidth = bookWidth * 0.6;
+    const photoHeight = bookHeight * 0.6;
+    const photoGeometry = new THREE.PlaneGeometry(photoWidth, photoHeight);
+    const photoMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+
+    const photoMesh = new THREE.Mesh(photoGeometry, photoMaterial);
+    photoMesh.position.set(bookWidth * 0.5, 0, 0.001); // Centered slightly above page surface
+    pagePivot.add(photoMesh);
+
+    // Optional: decorative border (simple thin frame)
+    const borderMaterial = new THREE.LineBasicMaterial({ color: 0x999999 });
+    const borderGeometry = new THREE.EdgesGeometry(photoGeometry);
+    const borderLines = new THREE.LineSegments(borderGeometry, borderMaterial);
+    borderLines.position.copy(photoMesh.position);
+    pagePivot.add(borderLines);
+
+    // Position stacking
     const zOffset = i * (pageThickness + 0.005);
     pagePivot.position.set(-bookWidth / 2, 0, zOffset);
 
     pages.push(pagePivot);
 }
+
 
 // Center book
 bookGroup.position.set(0, 0, 0);
