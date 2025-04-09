@@ -1,134 +1,204 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+// Grab the container and match its size
+const container = document.getElementById('book-container');
+const containerWidth = container.clientWidth;
+const containerHeight = container.clientHeight;
 
+// Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#f0e8d9');
+scene.background = new THREE.Color(0xf0e6d2);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 10;
+// Camera setup
+const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 1000);
+camera.position.set(0, 5, 18);
+camera.lookAt(0, 0, 0);
 
+// Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+renderer.setSize(containerWidth, containerHeight);
+container.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+scene.add(ambientLight);
+const pointLight = new THREE.PointLight(0xffffff, 2);
+pointLight.position.set(10, 20, 10);
+scene.add(pointLight);
 
+// Materials
+const coverMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0cb, side: THREE.DoubleSide });
+const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+
+// Book dimensions
+const coverThickness = 0.2;
+const pageThickness = 0.02;
+const bookWidth = 6;
+const bookHeight = 8;
+const pageCount = 12;
+
+// Book group
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
+const totalBookThickness = pageCount * pageThickness;
 
-const bookWidth = 4;
-const bookHeight = 6;
-const pageCount = 12;
-const pageThickness = 0.02;
-const coverThickness = 0.1;
-const totalBookThickness = pageCount * pageThickness + coverThickness * 2;
+// Front cover
+const frontCoverPivot = new THREE.Group();
+bookGroup.add(frontCoverPivot);
+const frontCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+frontCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
+const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
+frontCoverPivot.add(frontCover);
+frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2 + 0.01);
 
-const coverMaterial = new THREE.MeshBasicMaterial({ color: '#faebd7' });
+// Back cover
+const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
+backCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
+const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
+backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
+bookGroup.add(backCover);
 
-const leftCover = new THREE.Mesh(new THREE.BoxGeometry(coverThickness, bookHeight, bookWidth), coverMaterial);
-leftCover.position.set(-coverThickness / 2, 0, 0);
-bookGroup.add(leftCover);
-
-const rightCover = new THREE.Mesh(new THREE.BoxGeometry(coverThickness, bookHeight, bookWidth), coverMaterial);
-rightCover.position.set(pageCount * pageThickness + coverThickness / 2, 0, 0);
-bookGroup.add(rightCover);
-
-const pages = [];
-
-function generateMonthlyDates(startDate, count) {
-    const dates = [];
-    let current = new Date(startDate);
-    for (let i = 0; i < count; i++) {
-        dates.push(new Date(current));
-        current.setMonth(current.getMonth() + 1);
-    }
-    return dates;
-}
-
-const startDate = new Date("2024-04-09");
-const dates = generateMonthlyDates(startDate, pageCount);
-const urls = dates.map((d, i) => `https://example.com/month-${i + 1}`);
-
-bookGroup.rotation.y = Math.PI;
-
-const loader = new THREE.TextureLoader();
-
-function createPageTexture(text) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#f8e8c8';
-    ctx.fillRect(0, 0, 40, canvas.height);
-
-    ctx.fillStyle = '#000000';
-    ctx.font = '40px serif';
-    ctx.fillText(text, 100, 100);
-
-    return new THREE.CanvasTexture(canvas);
-}
-
-pages.length = 0;
-
+// Date data
+const dateLinks = [];
 for (let i = 0; i < pageCount; i++) {
-    const pagePivot = new THREE.Group();
-    bookGroup.add(pagePivot);
-
-    const dateText = dates[i].toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-    });
-
-    const texture = createPageTexture(dateText);
-    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-
-    const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
-    pageGeometry.translate(bookWidth / 2, 0, 0);
-
-    const page = new THREE.Mesh(pageGeometry, material);
-    pagePivot.add(page);
-
-    const zOffset = i * (pageThickness + 0.005);
-    pagePivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 - zOffset - pageThickness);
-    pages.push(pagePivot);
-
-    page.userData.url = urls[i];
+    const date = new Date(2024, 3 + i, 9);
+    const text = `${date.getMonth() + 1}/${date.getDate()}/${String(date.getFullYear()).slice(2)}`;
+    const url = `https://example.com/page${i + 1}`; // Replace with real URLs
+    dateLinks.push({ text, url });
 }
 
-renderer.domElement.addEventListener('pointerdown', (event) => {
-    const mouse = new THREE.Vector2(
-        (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
-        -(event.clientY / renderer.domElement.clientHeight) * 2 + 1
-    );
+// Font loader + Pages with text
+const pages = [];
+const loader = new THREE.FontLoader();
+loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
 
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
+    for (let i = 0; i < pageCount; i++) {
+        const pagePivot = new THREE.Group();
+        bookGroup.add(pagePivot);
 
-    const intersects = raycaster.intersectObjects(pages.map(p => p.children[0]));
-    if (intersects.length > 0) {
-        const clickedPage = intersects[0].object;
-        if (clickedPage.userData.url) {
-            window.open(clickedPage.userData.url, '_blank');
-        }
+        // Create page geometry
+        const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
+        pageGeometry.translate(bookWidth / 2, 0, 0);
+        const page = new THREE.Mesh(pageGeometry, pageMaterial);
+        pagePivot.add(page);
+
+        // Create text mesh
+        const textGeo = new THREE.TextGeometry(dateLinks[i].text, {
+            font: font,
+            size: 0.5,
+            height: 0.05,
+        });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const textMesh = new THREE.Mesh(textGeo, textMaterial);
+        textMesh.position.set(bookWidth * 0.5 - 1.5, -0.5, 0.01);
+        textMesh.userData = { url: dateLinks[i].url };
+        pagePivot.add(textMesh);
+
+        // Position in z-stack
+        const zOffset = i * (pageThickness + 0.005);
+        pagePivot.position.set(-bookWidth / 2, 0, zOffset);
+
+        pages.push(pagePivot);
     }
 });
 
+// Flip logic
+let isFlipping = false;
+let currentPage = 0;
+let coverOpened = false;
+
+window.addEventListener('click', (event) => {
+    if (isFlipping) return;
+
+    // Raycast for clickable text
+    const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0 && intersects[0].object.userData.url) {
+        window.open(intersects[0].object.userData.url, '_blank');
+        return;
+    }
+
+    // Flip cover or page
+    if (!coverOpened) {
+        isFlipping = true;
+        const targetRotation = Math.PI;
+        function openCover() {
+            frontCoverPivot.rotation.y -= 0.05;
+            if (frontCoverPivot.rotation.y <= -targetRotation) {
+                frontCoverPivot.rotation.y = -targetRotation;
+                coverOpened = true;
+                isFlipping = false;
+            } else {
+                requestAnimationFrame(openCover);
+            }
+            renderer.render(scene, camera);
+        }
+        openCover();
+    } else if (currentPage < pages.length) {
+        isFlipping = true;
+        flipPage();
+    }
+});
+
+function flipPage() {
+    const page = pages[currentPage];
+    const mesh = page.children[0];
+    const geometry = mesh.geometry;
+    const position = geometry.attributes.position;
+    const vertexCount = position.count;
+    const maxRotation = Math.PI;
+    const step = 0.05;
+
+    page.rotation.y -= step;
+    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
+
+    for (let i = 0; i < vertexCount; i++) {
+        const x = position.getX(i);
+        const normalizedX = x / bookWidth;
+        const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
+        position.setZ(i, curve);
+    }
+    position.needsUpdate = true;
+    renderer.render(scene, camera);
+
+    if (page.rotation.y <= -maxRotation) {
+        page.rotation.y = -maxRotation;
+
+        for (let i = 0; i < vertexCount; i++) {
+            const x = position.getX(i);
+            const normalizedX = x / bookWidth;
+            const curve = Math.sin(normalizedX * Math.PI) * 0.1;
+            position.setZ(i, curve);
+        }
+        position.needsUpdate = true;
+
+        const flippedZOffset = -(pageCount - currentPage - 1) * (pageThickness + 0.005);
+        page.position.set(-bookWidth / 2, 0, flippedZOffset);
+        page.rotation.y = -Math.PI;
+        page.rotation.z = (currentPage % 2 === 0 ? 1 : -1) * currentPage * 0.002;
+
+        currentPage++;
+        isFlipping = false;
+    } else {
+        requestAnimationFrame(() => flipPage());
+    }
+}
+
+// Resize
+window.addEventListener('resize', () => {
+    const newWidth = container.clientWidth;
+    const newHeight = container.clientHeight;
+    renderer.setSize(newWidth, newHeight);
+    camera.aspect = newWidth / newHeight;
+    camera.updateProjectionMatrix();
+});
+
+// Animate
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
     renderer.render(scene, camera);
 }
 animate();
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
