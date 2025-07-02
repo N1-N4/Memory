@@ -1,3 +1,5 @@
+// script.js
+
 // Grab the container and match its size
 const container = document.getElementById('book-container');
 const containerWidth = container.clientWidth;
@@ -18,10 +20,9 @@ renderer.setSize(containerWidth, containerHeight);
 container.appendChild(renderer.domElement);
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-scene.add(ambientLight);
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
-const pointLight = new THREE.PointLight(0xffffff, 2);
+const pointLight = new THREE.PointLight(0xffffff, 1.5);
 pointLight.position.set(10, 20, 10);
 scene.add(pointLight);
 
@@ -31,7 +32,7 @@ const pageMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.
 
 // Book dimensions
 const coverThickness = 0.2;
-const pageThickness = 0.02;
+const pageThickness = 0.005;
 const bookWidth = 6;
 const bookHeight = 8;
 const pageCount = 12;
@@ -40,138 +41,124 @@ const pageCount = 12;
 const bookGroup = new THREE.Group();
 scene.add(bookGroup);
 
-const totalBookThickness = pageCount * pageThickness;
-
 // Front cover
 const frontCoverPivot = new THREE.Group();
+frontCoverPivot.position.set(-bookWidth / 2, 0, 0);
+
+const frontCoverGeo = new THREE.BoxGeometry(bookWidth, bookHeight, coverThickness);
+frontCoverGeo.translate(bookWidth / 2, 0, 0);
+const frontCover = new THREE.Mesh(frontCoverGeo, coverMaterial);
+frontCoverPivot.add(frontCover);
 bookGroup.add(frontCoverPivot);
 
-const frontCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-frontCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
-const frontCover = new THREE.Mesh(frontCoverGeometry, coverMaterial);
-frontCoverPivot.add(frontCover);
-frontCoverPivot.position.set(-bookWidth / 2, 0, totalBookThickness / 2 + coverThickness / 2 + 0.01);
-
 // Back cover
-const backCoverGeometry = new THREE.BoxGeometry(bookWidth + 0.2, bookHeight + 0.2, coverThickness);
-backCoverGeometry.translate((bookWidth + 0.2) / 2, 0, 0);
-const backCover = new THREE.Mesh(backCoverGeometry, coverMaterial);
-backCover.position.set(-bookWidth / 2, 0, -totalBookThickness / 2 - coverThickness / 2 - 0.01);
+const backCoverGeo = new THREE.BoxGeometry(bookWidth, bookHeight, coverThickness);
+backCoverGeo.translate(bookWidth / 2, 0, 0);
+const backCover = new THREE.Mesh(backCoverGeo, coverMaterial);
+backCover.position.set(-bookWidth / 2, 0, -pageCount * pageThickness - coverThickness);
 bookGroup.add(backCover);
 
 // Pages
 const pages = [];
 for (let i = 0; i < pageCount; i++) {
-    const pagePivot = new THREE.Group();
-    bookGroup.add(pagePivot);
+  const pagePivot = new THREE.Group();
+  pagePivot.position.set(-bookWidth / 2, 0, -i * pageThickness);
 
-    const pageGeometry = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
-    pageGeometry.translate(bookWidth / 2, 0, 0);
+  const pageGeo = new THREE.PlaneGeometry(bookWidth, bookHeight, 20, 1);
+  pageGeo.translate(bookWidth / 2, 0, 0);
 
-    const page = new THREE.Mesh(pageGeometry, pageMaterial);
-    pagePivot.add(page);
-
-    const zOffset = i * (pageThickness + 0.005);
-    pagePivot.position.set(-bookWidth / 2, 0, zOffset);
-
-    pages.push(pagePivot);
+  const page = new THREE.Mesh(pageGeo, pageMaterial);
+  pagePivot.add(page);
+  bookGroup.add(pagePivot);
+  pages.push(pagePivot);
 }
 
-// Center book
-bookGroup.position.set(0, 0, 0);
-
-// Flip logic
+// State control
 let isFlipping = false;
 let currentPage = 0;
 let coverOpened = false;
 
 window.addEventListener('click', () => {
-    if (isFlipping) return;
+  if (isFlipping) return;
 
-    if (!coverOpened) {
-        isFlipping = true;
-        const targetRotation = Math.PI;
-
-        function openCover() {
-            frontCoverPivot.rotation.y -= 0.05;
-            if (frontCoverPivot.rotation.y <= -targetRotation) {
-                frontCoverPivot.rotation.y = -targetRotation;
-                coverOpened = true;
-                isFlipping = false;
-            } else {
-                requestAnimationFrame(openCover);
-            }
-            renderer.render(scene, camera);
-        }
-        openCover();
-    } else if (currentPage < pages.length) {
-        isFlipping = true;
-        flipPage();
-    }
+  if (!coverOpened) {
+    isFlipping = true;
+    openCover();
+  } else if (currentPage < pages.length) {
+    isFlipping = true;
+    flipPage(pages[currentPage]);
+    currentPage++;
+  }
 });
 
-function flipPage() {
-    const page = pages[currentPage];
-    const mesh = page.children[0];
-    const geometry = mesh.geometry;
-    const position = geometry.attributes.position;
-    const vertexCount = position.count;
-
-    const maxRotation = Math.PI;
-    const step = 0.05;
-
-    page.rotation.y -= step;
-
-    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRotation) / maxRotation, 0, 1);
-
-    for (let i = 0; i < vertexCount; i++) {
-        const x = position.getX(i);
-        const normalizedX = x / bookWidth;
-        const curve = Math.sin(normalizedX * Math.PI) * 0.5 * progress;
-        position.setZ(i, curve);
-    }
-    position.needsUpdate = true;
-    renderer.render(scene, camera);
-
-    if (page.rotation.y <= -maxRotation) {
-        page.rotation.y = -maxRotation;
-
-        for (let i = 0; i < vertexCount; i++) {
-            const x = position.getX(i);
-            const normalizedX = x / bookWidth;
-            const curve = Math.sin(normalizedX * Math.PI) * 0.1;
-            position.setZ(i, curve);
-        }
-        position.needsUpdate = true;
-
-        // ✅ Fixed z-stacking so flipped pages go to the other side
-        const flippedZOffset = -(pageCount - currentPage - 1) * (pageThickness + 0.005);
-        page.position.set(-bookWidth / 2, 0, flippedZOffset);
-        page.rotation.y = -Math.PI;
-
-        // Optional: add slight stagger to prevent clipping
-        page.rotation.z = (currentPage % 2 === 0 ? 1 : -1) * currentPage * 0.002;
-
-        currentPage++;
-        isFlipping = false;
+function openCover() {
+  const targetRotation = Math.PI;
+  function animateCover() {
+    frontCoverPivot.rotation.y -= 0.05;
+    if (frontCoverPivot.rotation.y <= -targetRotation) {
+      frontCoverPivot.rotation.y = -targetRotation;
+      coverOpened = true;
+      isFlipping = false;
     } else {
-        requestAnimationFrame(flipPage);
+      requestAnimationFrame(animateCover);
     }
+    renderer.render(scene, camera);
+  }
+  animateCover();
 }
 
-// Resize handler
-window.addEventListener('resize', () => {
-    const newWidth = container.clientWidth;
-    const newHeight = container.clientHeight;
+function flipPage(page) {
+  const mesh = page.children[0];
+  const geo = mesh.geometry;
+  const pos = geo.attributes.position;
+  const count = pos.count;
 
-    renderer.setSize(newWidth, newHeight);
-    camera.aspect = newWidth / newHeight;
-    camera.updateProjectionMatrix();
+  const maxRot = Math.PI;
+  const step = 0.05;
+
+  function animateFlip() {
+    page.rotation.y -= step;
+    const progress = THREE.MathUtils.clamp((page.rotation.y + maxRot) / maxRot, 0, 1);
+
+    for (let i = 0; i < count; i++) {
+      const x = pos.getX(i);
+      const nx = x / bookWidth;
+      const curve = Math.sin(nx * Math.PI) * 0.5 * progress;
+      pos.setZ(i, curve);
+    }
+    pos.needsUpdate = true;
+    renderer.render(scene, camera);
+
+    if (page.rotation.y <= -maxRot) {
+      page.rotation.y = -maxRot;
+      for (let i = 0; i < count; i++) {
+        const x = pos.getX(i);
+        const nx = x / bookWidth;
+        pos.setZ(i, Math.sin(nx * Math.PI) * 0.1);
+      }
+      pos.needsUpdate = true;
+      page.position.z = -(pageCount - currentPage - 1) * pageThickness;
+      page.rotation.z = (currentPage % 2 === 0 ? 1 : -1) * currentPage * 0.001;
+      isFlipping = false;
+    } else {
+      requestAnimationFrame(animateFlip);
+    }
+  }
+  animateFlip();
+}
+
+// Handle window resizing
+window.addEventListener('resize', () => {
+  const newW = container.clientWidth;
+  const newH = container.clientHeight;
+  renderer.setSize(newW, newH);
+  camera.aspect = newW / newH;
+  camera.updateProjectionMatrix();
 });
 
-// Animation loop
+// Animate loop
 function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
 animate();
